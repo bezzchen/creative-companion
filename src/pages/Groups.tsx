@@ -232,7 +232,7 @@ const Groups = () => {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
                 className="text-center font-mono tracking-widest text-lg"
-                maxLength={6}
+                maxLength={8}
               />
               <Button className="w-full rounded-xl" onClick={handleJoin} disabled={joinGroup.isPending}>
                 {joinGroup.isPending ? "Joining..." : "Join Group"}
