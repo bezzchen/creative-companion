@@ -1,24 +1,36 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useApp, COSMETIC_STORE, AnimalType } from "@/context/AppContext";
-import { Plus, Clock, Flame } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Plus, Clock, Flame, LogOut } from "lucide-react";
 import { animalIconImages } from "@/components/AnimalCharacter";
 
 const allAnimals: AnimalType[] = ["bear", "cat", "dog", "chicken"];
 
 const Profile = () => {
   const { paws, username, hoursStudied, streak, status, setStatus, equippedBorder, animal, setAnimal } = useApp();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
 
   const borderItem = equippedBorder ? COSMETIC_STORE.find((c) => c.id === equippedBorder) : null;
   const statuses = ["studying", "in-event", "away", "offline"] as const;
-
   const currentIcon = animal ? animalIconImages[animal] : null;
 
   return (
     <div className="min-h-screen bg-background pb-28">
       <div className="px-6 pt-10 flex flex-col items-center">
-        {/* Avatar - using icon */}
+        {/* Logout */}
+        <div className="w-full flex justify-end mb-2">
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </div>
+
+        {/* Avatar */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -44,12 +56,7 @@ const Profile = () => {
         </motion.h1>
 
         {/* Animal Selector */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.18 }}
-          className="flex gap-3 mt-3"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="flex gap-3 mt-3">
           {allAnimals.map((a) => (
             <button
               key={a}
@@ -64,20 +71,13 @@ const Profile = () => {
         </motion.div>
 
         {/* Status toggle */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex gap-2 mt-4 flex-wrap justify-center"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex gap-2 mt-4 flex-wrap justify-center">
           {statuses.map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize transition-colors ${
-                status === s
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                status === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
               {s.replace("-", " ")}
@@ -94,7 +94,7 @@ const Profile = () => {
         >
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50 text-center">
             <Clock className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold text-foreground">{hoursStudied}</p>
+            <p className="text-2xl font-bold text-foreground">{Number(hoursStudied).toFixed(1)}</p>
             <p className="text-xs text-muted-foreground mt-1">Hours Studied</p>
           </div>
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50 text-center">
@@ -105,12 +105,7 @@ const Profile = () => {
         </motion.div>
 
         {/* Paws balance */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="w-full max-w-sm mt-4"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="w-full max-w-sm mt-4">
           <button
             onClick={() => navigate("/store")}
             className="w-full flex items-center justify-between p-5 bg-card rounded-2xl shadow-sm border border-border/50"

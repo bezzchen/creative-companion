@@ -3,8 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AppProvider, useApp } from "@/context/AppContext";
 import BottomNav from "@/components/BottomNav";
+import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
 import Groups from "./pages/Groups";
@@ -14,8 +16,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const AppRoutes = () => {
-  const { animal } = useApp();
+const ProtectedRoutes = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { animal, profileLoading } = useApp();
+
+  if (authLoading || profileLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
+  }
+
+  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <>
@@ -39,9 +48,14 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppProvider>
-            <AppRoutes />
-          </AppProvider>
+          <AuthProvider>
+            <AppProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/*" element={<ProtectedRoutes />} />
+              </Routes>
+            </AppProvider>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
