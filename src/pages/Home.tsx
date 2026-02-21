@@ -103,7 +103,7 @@ const Home = () => {
                 exit={{ opacity: 0, x: 40, scale: 0.5 }}
                 transition={{ type: "spring", stiffness: 100 }}
                 onClick={() => navigate("/groups")}
-                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-border/50 z-20"
+                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
                 <Users className="w-5 h-5 text-primary" />
               </motion.button>
@@ -123,7 +123,7 @@ const Home = () => {
                 exit={{ opacity: 0, x: -40, scale: 0.5 }}
                 transition={{ type: "spring", stiffness: 100 }}
                 onClick={() => navigate("/profile")}
-                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-border/50 z-20"
+                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
                 <User className="w-5 h-5 text-primary" />
               </motion.button>
