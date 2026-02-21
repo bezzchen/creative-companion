@@ -40,6 +40,30 @@ export type Database = {
           },
         ]
       }
+      cosmetics: {
+        Row: {
+          category: string
+          id: string
+          name: string
+          preview: string
+          price: number
+        }
+        Insert: {
+          category: string
+          id: string
+          name: string
+          preview: string
+          price: number
+        }
+        Update: {
+          category?: string
+          id?: string
+          name?: string
+          preview?: string
+          price?: number
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
@@ -230,6 +254,7 @@ export type Database = {
         Returns: boolean
       }
       join_group_by_code: { Args: { code: string }; Returns: string }
+      purchase_cosmetic: { Args: { cosmetic_id_input: string }; Returns: Json }
       start_study_session: { Args: never; Returns: string }
     }
     Enums: {
