@@ -23,13 +23,13 @@ export const useCosmetics = () => {
   const buyCosmetic = useMutation({
     mutationFn: async (cosmeticId: string) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase
-        .from("user_cosmetics")
-        .insert({ user_id: user.id, cosmetic_id: cosmeticId });
+      const { data, error } = await supabase.rpc("purchase_cosmetic", { cosmetic_id_input: cosmeticId });
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cosmetics", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
     },
   });
 

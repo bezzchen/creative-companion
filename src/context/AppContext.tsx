@@ -113,7 +113,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [updateProfile]);
 
   const setUsername = useCallback((n: string) => {
-    updateProfile.mutate({ username: n });
+    const trimmed = n.trim();
+    if (!trimmed || trimmed.length > 50) return;
+    updateProfile.mutate({ username: trimmed });
   }, [updateProfile]);
 
   const setStatus = useCallback((s: UserStatus) => {
@@ -177,10 +179,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const buyCosmetic = useCallback((item: CosmeticItem) => {
     if (paws < item.price || ownedCosmetics.includes(item.id)) return false;
-    updateProfile.mutate({ paws: paws - item.price });
+    // Server-side RPC handles atomic paws deduction + cosmetic insertion
     buyFromDb.mutate(item.id);
     return true;
-  }, [paws, ownedCosmetics, updateProfile, buyFromDb]);
+  }, [paws, ownedCosmetics, buyFromDb]);
 
   const equipCosmetic = useCallback((id: string, category: "hat" | "border" | "background") => {
     if (category === "hat") updateProfile.mutate({ equipped_hat: id });
