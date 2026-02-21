@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_study_sessions: {
+        Row: {
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_study_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
@@ -196,8 +222,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_study_session: { Args: never; Returns: undefined }
+      complete_study_session: { Args: never; Returns: Json }
       generate_invite_code: { Args: never; Returns: string }
       join_group_by_code: { Args: { code: string }; Returns: string }
+      start_study_session: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

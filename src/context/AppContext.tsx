@@ -90,13 +90,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { user } = useAuth();
   const { profile, isLoading: profileLoading, updateProfile } = useProfile();
   const { ownedCosmetics, buyCosmetic: buyFromDb } = useCosmetics();
-  const { logSession } = useStudySessions();
+  const { startSession, completeSession } = useStudySessions();
 
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [showBreakReminder, setShowBreakReminder] = useState(false);
   const intervalRef = useRef<number | null>(null);
-  const timerStartRef = useRef<Date | null>(null);
 
   // Derived from profile
   const animal = (profile?.animal as AnimalType) || null;
@@ -135,11 +134,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const startTimer = useCallback(() => {
     if (!timerRunning && timerSeconds === 0) {
-      timerStartRef.current = new Date();
+      // Record session start server-side
+      startSession.mutate();
     }
     setTimerRunning(true);
-    updateProfile.mutate({ status: "studying" });
-  }, [timerRunning, timerSeconds, updateProfile]);
+  }, [timerRunning, timerSeconds, startSession]);
 
   const pauseTimer = useCallback(() => {
     setTimerRunning(false);
@@ -147,18 +146,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const stopTimer = useCallback(() => {
     setTimerRunning(false);
-    const minutes = Math.floor(timerSeconds / 60);
-    const pawsEarned = minutes * 10;
-    if (timerSeconds > 0 && timerStartRef.current) {
-      logSession.mutate({
-        durationSeconds: timerSeconds,
-        pawsEarned,
-        startedAt: timerStartRef.current,
-      });
+    if (timerSeconds > 0) {
+      // Server calculates duration & rewards from its own recorded start time
+      completeSession.mutate();
     }
     setTimerSeconds(0);
-    timerStartRef.current = null;
-  }, [timerSeconds, logSession]);
+  }, [timerSeconds, completeSession]);
 
   // Timer interval
   useEffect(() => {
