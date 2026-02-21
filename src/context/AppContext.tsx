@@ -37,8 +37,6 @@ interface AppState {
   animal: AnimalType | null;
   setAnimal: (a: AnimalType) => void;
   paws: number;
-  addPaws: (n: number) => void;
-  spendPaws: (n: number) => boolean;
   timerSeconds: number;
   timerRunning: boolean;
   startTimer: () => void;
@@ -122,17 +120,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateProfile.mutate({ status: s });
   }, [updateProfile]);
 
-  const addPaws = useCallback((n: number) => {
-    updateProfile.mutate({ paws: paws + n });
-  }, [updateProfile, paws]);
-
-  const spendPaws = useCallback((n: number) => {
-    if (paws >= n) {
-      updateProfile.mutate({ paws: paws - n });
-      return true;
-    }
-    return false;
-  }, [updateProfile, paws]);
+  // addPaws and spendPaws removed — all currency operations go through server RPCs
 
   const startTimer = useCallback(() => {
     if (!timerRunning && timerSeconds === 0) {
@@ -206,7 +194,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider
       value={{
-        animal, setAnimal, paws, addPaws, spendPaws,
+        animal, setAnimal, paws,
         timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer,
         status, setStatus, username, setUsername,
         hoursStudied, streak, ownedCosmetics,

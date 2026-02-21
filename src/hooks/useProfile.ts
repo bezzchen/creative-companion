@@ -35,12 +35,26 @@ export const useProfile = () => {
     enabled: !!user,
   });
 
+  // Only allow safe fields to be updated directly
+  const ALLOWED_FIELDS = new Set([
+    "username", "animal", "status",
+    "equipped_hat", "equipped_border", "equipped_background",
+  ]);
+
   const updateProfile = useMutation({
     mutationFn: async (updates: Partial<Profile>) => {
       if (!user) throw new Error("Not authenticated");
+      // Strip any protected fields (paws, hours_studied, streak)
+      const safeUpdates: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(updates)) {
+        if (ALLOWED_FIELDS.has(key)) {
+          safeUpdates[key] = value;
+        }
+      }
+      if (Object.keys(safeUpdates).length === 0) return;
       const { error } = await supabase
         .from("profiles")
-        .update(updates)
+        .update(safeUpdates)
         .eq("id", user.id);
       if (error) throw error;
     },
