@@ -1,36 +1,48 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useApp, StudyGroup, UserStatus, AnimalType, COSMETIC_STORE } from "@/context/AppContext";
-import { Plus, ChevronLeft, Share2 } from "lucide-react";
-import AnimalCharacter from "@/components/AnimalCharacter";
+import { useApp, StudyGroup, AnimalType, COSMETIC_STORE } from "@/context/AppContext";
+import { Plus, ChevronLeft, Copy, Check } from "lucide-react";
+import { animalIconImages } from "@/components/AnimalCharacter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-import bearImg from "@/assets/bear.png";
-import catImg from "@/assets/cat.png";
-import dogImg from "@/assets/dog.png";
-import duckImg from "@/assets/duck.png";
+import bearActiveImg from "@/assets/bearactive.png";
+import catActiveImg from "@/assets/catactive.png";
+import dogActiveImg from "@/assets/dogactive.png";
+import chickenActiveImg from "@/assets/chickenactive.png";
+import idleTableImg from "@/assets/idletable.png";
 
-const animalIcons: Record<AnimalType, string> = { bear: bearImg, cat: catImg, dog: dogImg, chicken: duckImg };
-
-const statusColors: Record<UserStatus, string> = {
-  studying: "bg-green-400",
-  "in-event": "bg-yellow-400",
-  away: "bg-orange-400",
-  offline: "bg-muted-foreground/40",
+const activeImages: Record<AnimalType, string> = {
+  bear: bearActiveImg,
+  cat: catActiveImg,
+  dog: dogActiveImg,
+  chicken: chickenActiveImg,
 };
 
-const statusLabels: Record<UserStatus, string> = {
-  studying: "Studying",
-  "in-event": "In Event",
-  away: "Away",
-  offline: "Offline",
-};
+const rankLabels = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 
 const Groups = () => {
   const { groups } = useApp();
   const [selectedGroup, setSelectedGroup] = useState<StudyGroup | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
+  const [showCreateJoin, setShowCreateJoin] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupEmoji, setNewGroupEmoji] = useState("📚");
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    toast.success("Invite code copied!");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen theme-gradient pb-28">
       <AnimatePresence mode="wait">
         {!selectedGroup ? (
           <motion.div
@@ -48,7 +60,7 @@ const Groups = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedGroup(g)}
-                  className="w-full flex items-center gap-4 p-4 bg-card rounded-2xl shadow-sm border border-border/50 text-left"
+                  className="w-full flex items-center gap-4 p-4 bg-card/80 backdrop-blur-sm rounded-2xl shadow-sm border border-border/50 text-left"
                 >
                   <span className="text-3xl">{g.icon}</span>
                   <div className="flex-1">
@@ -61,6 +73,7 @@ const Groups = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setShowCreateJoin(true)}
               className="w-full mt-4 flex items-center justify-center gap-2 p-4 bg-primary/10 rounded-2xl border border-primary/20 text-primary font-semibold"
             >
               <Plus className="w-5 h-5" />
@@ -77,13 +90,20 @@ const Groups = () => {
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => setSelectedGroup(null)} className="p-2 -ml-2">
-                <ChevronLeft className="w-6 h-6 text-foreground" />
-              </button>
-              <h1 className="text-xl font-extrabold text-foreground">{selectedGroup.name}</h1>
-              <button className="p-2 -mr-2">
-                <Share2 className="w-5 h-5 text-primary" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setSelectedGroup(null)} className="p-2 -ml-2">
+                  <ChevronLeft className="w-6 h-6 text-foreground" />
+                </button>
+                <h1 className="text-xl font-extrabold text-foreground">My Study Group</h1>
+              </div>
+              <Button
+                onClick={() => setShowInvite(true)}
+                size="sm"
+                className="rounded-full px-4 gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                Invite
+              </Button>
             </div>
 
             {/* Leaderboard */}
@@ -91,10 +111,12 @@ const Groups = () => {
               {[...selectedGroup.members]
                 .sort((a, b) => b.hours - a.hours)
                 .map((member, i) => {
-                  const rank = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`;
                   const borderItem = member.equippedBorder
                     ? COSMETIC_STORE.find((c) => c.id === member.equippedBorder)
                     : null;
+                  const statusImg = member.status === "studying"
+                    ? activeImages[member.animal]
+                    : idleTableImg;
 
                   return (
                     <motion.div
@@ -102,30 +124,38 @@ const Groups = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.08 }}
-                      className="flex items-center gap-3 p-4 bg-card rounded-2xl shadow-sm border border-border/50"
+                      className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/30"
                     >
-                      <span className="text-xl w-8 text-center font-bold">{rank}</span>
-                      <div className="relative">
-                        <div
-                          className={`w-11 h-11 rounded-full overflow-hidden bg-muted flex items-center justify-center ${
-                            borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
-                          }`}
-                        >
-                          <img
-                            src={animalIcons[member.animal]}
-                            alt={member.animal}
-                            className="w-8 h-8 object-contain"
-                          />
-                        </div>
-                        <div
-                          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ${statusColors[member.status]} ring-2 ring-card`}
+                      {/* Rank */}
+                      <span className="text-sm font-bold text-muted-foreground w-8 text-center">
+                        {rankLabels[i] || `${i + 1}th`}
+                      </span>
+
+                      {/* Avatar */}
+                      <div
+                        className={`w-10 h-10 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center flex-shrink-0 ${
+                          borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
+                        }`}
+                      >
+                        <img
+                          src={animalIconImages[member.animal]}
+                          alt={member.animal}
+                          className="w-7 h-7 object-contain"
                         />
                       </div>
+
+                      {/* Name + hours */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground truncate">{member.name}</p>
-                        <p className="text-xs text-muted-foreground">{statusLabels[member.status]}</p>
+                        <p className="font-bold text-foreground text-sm truncate">{member.name}</p>
+                        <p className="text-xs text-muted-foreground">{member.hours} hrs</p>
                       </div>
-                      <span className="text-sm font-semibold text-muted-foreground">{member.hours} hrs</span>
+
+                      {/* Status illustration */}
+                      <img
+                        src={statusImg}
+                        alt={member.status === "studying" ? "Studying" : "Idle"}
+                        className="w-16 h-12 object-contain flex-shrink-0"
+                      />
                     </motion.div>
                   );
                 })}
@@ -133,6 +163,80 @@ const Groups = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Invite Code Dialog */}
+      <Dialog open={showInvite} onOpenChange={setShowInvite}>
+        <DialogContent className="rounded-2xl max-w-xs mx-auto">
+          <DialogHeader>
+            <DialogTitle>Invite Code</DialogTitle>
+            <DialogDescription>Share this code so others can join your group.</DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3 bg-muted rounded-xl p-4 mt-2">
+            <span className="text-2xl font-mono font-bold text-foreground tracking-widest flex-1 text-center">
+              {selectedGroup?.inviteCode || "------"}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => handleCopyCode(selectedGroup?.inviteCode || "")}
+            >
+              {copied ? <Check className="w-5 h-5 text-primary" /> : <Copy className="w-5 h-5" />}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create / Join Dialog */}
+      <Dialog open={showCreateJoin} onOpenChange={setShowCreateJoin}>
+        <DialogContent className="rounded-2xl max-w-xs mx-auto">
+          <DialogHeader>
+            <DialogTitle>Create or Join a Group</DialogTitle>
+            <DialogDescription>Enter a code to join, or create a new study group.</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="join" className="mt-2">
+            <TabsList className="w-full">
+              <TabsTrigger value="join" className="flex-1">Join</TabsTrigger>
+              <TabsTrigger value="create" className="flex-1">Create</TabsTrigger>
+            </TabsList>
+            <TabsContent value="join" className="space-y-3 pt-3">
+              <Input
+                placeholder="Enter invite code"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
+                className="text-center font-mono tracking-widest text-lg"
+                maxLength={6}
+              />
+              <Button className="w-full rounded-xl" onClick={() => { toast.success("Joined group!"); setShowCreateJoin(false); }}>
+                Join Group
+              </Button>
+            </TabsContent>
+            <TabsContent value="create" className="space-y-3 pt-3">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    const emojis = ["📚", "🦉", "🔥", "⭐", "🎯", "💪", "🧠", "🚀"];
+                    const idx = emojis.indexOf(newGroupEmoji);
+                    setNewGroupEmoji(emojis[(idx + 1) % emojis.length]);
+                  }}
+                  className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-2xl hover:bg-muted/80 transition-colors"
+                >
+                  {newGroupEmoji}
+                </button>
+                <Input
+                  placeholder="Group name"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              <Button className="w-full rounded-xl" onClick={() => { toast.success("Group created!"); setShowCreateJoin(false); }}>
+                Create Group
+              </Button>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

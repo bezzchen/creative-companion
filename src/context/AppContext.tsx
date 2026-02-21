@@ -25,6 +25,7 @@ export interface StudyGroup {
   id: string;
   name: string;
   icon: string;
+  inviteCode: string;
   members: GroupMember[];
 }
 
@@ -85,9 +86,11 @@ const MOCK_GROUPS: StudyGroup[] = [
     id: "1",
     name: "Study Squad",
     icon: "📚",
+    inviteCode: "SQ7K2X",
     members: [
       { id: "1", name: "Barry", animal: "bear", hours: 20, status: "studying", equippedHat: "hat-crown" },
       { id: "2", name: "Emily", animal: "cat", hours: 4, status: "away" },
+      { id: "3", name: "Rex", animal: "dog", hours: 8, status: "studying" },
       { id: "self", name: "You", animal: "bear", hours: 12, status: "studying" },
     ],
   },
@@ -95,8 +98,10 @@ const MOCK_GROUPS: StudyGroup[] = [
     id: "2",
     name: "Night Owls",
     icon: "🦉",
+    inviteCode: "NW3P9L",
     members: [
-      { id: "3", name: "Alex", animal: "dog", hours: 15, status: "in-event" },
+      { id: "4", name: "Alex", animal: "dog", hours: 15, status: "in-event" },
+      { id: "5", name: "Clucky", animal: "chicken", hours: 6, status: "offline" },
       { id: "self", name: "You", animal: "bear", hours: 12, status: "studying" },
     ],
   },
