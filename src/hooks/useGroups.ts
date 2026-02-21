@@ -58,6 +58,10 @@ export const useGroups = () => {
   const createGroup = useMutation({
     mutationFn: async ({ name, icon }: { name: string; icon: string }) => {
       if (!user) throw new Error("Not authenticated");
+      const trimmedName = name.trim();
+      if (trimmedName.length < 1 || trimmedName.length > 100) {
+        throw new Error("Group name must be 1-100 characters");
+      }
       // Generate invite code
       const { data: code, error: codeErr } = await supabase.rpc("generate_invite_code");
       if (codeErr) throw codeErr;
