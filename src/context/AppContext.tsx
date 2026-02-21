@@ -118,7 +118,7 @@ const load = <T,>(key: string, fallback: T): T => {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [animal, setAnimalState] = useState<AnimalType | null>(load("animal", null));
-  const [paws, setPaws] = useState(load("paws", 0));
+  const [paws, setPaws] = useState(load("paws", 300));
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [status, setStatus] = useState<UserStatus>(load("status", "offline"));

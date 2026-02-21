@@ -43,11 +43,27 @@ const Home = () => {
   }, [stopTimer]);
 
   return (
-    <div className="min-h-screen theme-gradient flex flex-col relative overflow-hidden">
+    <div className="min-h-screen theme-gradient grainy flex flex-col relative overflow-hidden">
       <BreakReminder />
 
+      {/* SVG Goo Filter */}
+      <svg className="absolute w-0 h-0" aria-hidden="true">
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"
+              result="goo"
+            />
+            <feBlend in="SourceGraphic" in2="goo" />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Top Bar - Paws */}
-      <div className="flex justify-end items-center px-5 pt-6 pb-2">
+      <div className="flex justify-end items-center px-5 pt-6 pb-2 relative z-10">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -61,7 +77,7 @@ const Home = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center relative px-6">
+      <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
         {/* Timer display */}
         <AnimatePresence>
           {isStudying && (
@@ -91,7 +107,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* Animal + Icons Zone */}
+        {/* Animal + Buttons Zone */}
         <div className="relative flex items-center justify-center">
           {/* Group icon - floating left */}
           <AnimatePresence>
@@ -132,68 +148,75 @@ const Home = () => {
 
           {/* Animal */}
           <div className="relative z-10">
-            <AnimalCharacter size="lg" active={isStudying} />
+            <AnimalCharacter size="xl" active={isStudying} />
+
+            {/* Play / Pause+Stop buttons overlaid centered on animal */}
+            <div
+              className="absolute inset-0 flex items-center justify-center z-30"
+              style={{ filter: "url(#goo)" }}
+            >
+              <AnimatePresence>
+                {!isStudying && (
+                  <motion.button
+                    key="play"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.6, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handlePlay}
+                    className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-xl glow-shadow"
+                  >
+                    <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {isStudying && (
+                  <motion.div
+                    key="controls"
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.6, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 150, damping: 15 }}
+                    className="flex items-center gap-8"
+                  >
+                    {/* Pause - splits left */}
+                    <motion.button
+                      initial={{ x: 20 }}
+                      animate={{ x: 0 }}
+                      transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={timerRunning ? handlePause : startTimer}
+                      className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-lg"
+                    >
+                      {timerRunning ? (
+                        <Pause className="w-6 h-6 text-accent-foreground" fill="currentColor" />
+                      ) : (
+                        <Play className="w-6 h-6 text-accent-foreground ml-0.5" fill="currentColor" />
+                      )}
+                    </motion.button>
+
+                    {/* Stop - splits right */}
+                    <motion.button
+                      initial={{ x: -20 }}
+                      animate={{ x: 0 }}
+                      transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleStop}
+                      className="w-14 h-14 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                    >
+                      <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
-
-        {/* Play / Pause+Stop buttons (Mitosis) */}
-        <div className="mt-2 relative h-2 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            {!isStudying ? (
-              <motion.button
-                key="play"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handlePlay}
-                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-xl glow-shadow"
-              >
-                <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
-              </motion.button>
-            ) : (
-              <motion.div
-                key="controls"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 150, damping: 15 }}
-                className="flex items-center gap-8"
-              >
-                {/* Pause - splits left */}
-                <motion.button
-                  initial={{ x: 0 }}
-                  animate={{ x: 0 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 12 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={timerRunning ? handlePause : startTimer}
-                  className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-lg"
-                >
-                  {timerRunning ? (
-                    <Pause className="w-6 h-6 text-accent-foreground" fill="currentColor" />
-                  ) : (
-                    <Play className="w-6 h-6 text-accent-foreground ml-0.5" fill="currentColor" />
-                  )}
-                </motion.button>
-
-                {/* Stop - splits right */}
-                <motion.button
-                  initial={{ x: 0 }}
-                  animate={{ x: 0 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 12 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleStop}
-                  className="w-14 h-14 rounded-full bg-destructive flex items-center justify-center shadow-lg"
-                >
-                  <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {isStudying && (

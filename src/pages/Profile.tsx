@@ -1,29 +1,37 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useApp, COSMETIC_STORE } from "@/context/AppContext";
+import { useApp, COSMETIC_STORE, AnimalType } from "@/context/AppContext";
 import { Plus, Clock, Flame } from "lucide-react";
-import AnimalCharacter from "@/components/AnimalCharacter";
+import { animalIconImages } from "@/components/AnimalCharacter";
+
+const allAnimals: AnimalType[] = ["bear", "cat", "dog", "chicken"];
 
 const Profile = () => {
-  const { paws, username, hoursStudied, streak, status, setStatus, equippedBorder } = useApp();
+  const { paws, username, hoursStudied, streak, status, setStatus, equippedBorder, animal, setAnimal } = useApp();
   const navigate = useNavigate();
 
   const borderItem = equippedBorder ? COSMETIC_STORE.find((c) => c.id === equippedBorder) : null;
   const statuses = ["studying", "in-event", "away", "offline"] as const;
 
+  const currentIcon = animal ? animalIconImages[animal] : null;
+
   return (
     <div className="min-h-screen bg-background pb-28">
       <div className="px-6 pt-10 flex flex-col items-center">
-        {/* Avatar */}
+        {/* Avatar - using icon */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 120 }}
-          className={`relative w-32 h-32 rounded-full bg-muted flex items-center justify-center ${
+          className={`relative w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
             borderItem ? "ring-4 ring-primary ring-offset-4 ring-offset-background" : "ring-2 ring-border"
           }`}
         >
-          <AnimalCharacter size="md" />
+          {currentIcon ? (
+            <img src={currentIcon} alt={animal || "avatar"} className="w-24 h-24 object-contain" draggable={false} />
+          ) : (
+            <div className="w-24 h-24 bg-muted rounded-full" />
+          )}
         </motion.div>
 
         <motion.h1
@@ -35,12 +43,32 @@ const Profile = () => {
           {username}
         </motion.h1>
 
+        {/* Animal Selector */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.18 }}
+          className="flex gap-3 mt-3"
+        >
+          {allAnimals.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAnimal(a)}
+              className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${
+                animal === a ? "border-primary scale-110 shadow-md" : "border-border opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img src={animalIconImages[a]} alt={a} className="w-full h-full object-contain" draggable={false} />
+            </button>
+          ))}
+        </motion.div>
+
         {/* Status toggle */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="flex gap-2 mt-3 flex-wrap justify-center"
+          className="flex gap-2 mt-4 flex-wrap justify-center"
         >
           {statuses.map((s) => (
             <button
