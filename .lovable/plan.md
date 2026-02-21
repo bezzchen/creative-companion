@@ -1,50 +1,41 @@
-# Groups Page Overhaul, Gooey Play Button, and Visual Polish
 
-## 1. New Asset Files
 
-Copy uploaded images into `src/assets/`:
+# Play Button, Profile, Grainy Effect, and Starting Currency Fixes
 
-- `catactive.png`, `caticon.png`
-- `chickenactive.png`, `chickenicon.png`
-- `dogactive.png`, `dogicon.png`
-- `idletable.png`
+## 1. Play Button Centered on Animal with Gooey Mitosis Fix
 
-Update `AnimalCharacter.tsx` to use the new "active" variants for all animals (not just bear). Add icon variants map for use in groups and profile picture.
+**Problem**: The play button is below the animal instead of overlapping it, and during the mitosis animation the play button disappears before pause/stop appear (due to `AnimatePresence mode="wait"`).
 
-## 2. Groups Page Redesign (matching GroupStatus.png)
+**Fix in `Home.tsx`**:
+- Move the play/pause/stop button container inside the animal's relative wrapper, absolutely positioned and centered both vertically and horizontally on top of the animal
+- Remove `AnimatePresence mode="wait"` so both the play button and the splitting buttons can be visible simultaneously during the transition
+- The play button should scale down and fade while the pause/stop buttons scale up from center, creating a continuous visible gooey blob effect
+- Apply the SVG goo filter to the wrapper so the overlapping circular shapes merge visually during transition
+- Increase animal size from `w-64 h-64` to `w-72 h-72` (new "xl" size)
 
-**Layout changes to `Groups.tsx`:**
+## 2. Profile Page - Animal Selector and Icon Usage
 
-- Header: "My Study Group" on left, rounded "+ Invite" button on right
-- Each leaderboard row shows: rank text (1st, 2nd...), circular animal icon PFP, name + hours, and the status illustration on the right side
-- Status illustrations: if member status is "studying", show their `{animal}active.png` (animal at table). If idle/away/offline, show `idletable.png` (empty table)
+**Changes to `Profile.tsx`**:
+- Use the animal **icon** image (`animalIconImages`) instead of the full animal PNG for the profile avatar
+- Add an "Edit Animal" section below the avatar: show all 4 animal options as small circular buttons. Tapping one calls `setAnimal()` which updates the global theme instantly
+- Import `animalIconImages` from `AnimalCharacter.tsx` for the avatar display
 
-**Invite Code Popup:**
+## 3. AnimalCharacter - Add "xl" Size
 
-- When "+ Invite" button is pressed, open a Dialog showing the group's invite code (mock: random 6-char code)
-- Copy-to-clipboard button
+**Changes to `AnimalCharacter.tsx`**:
+- Add `"xl"` to the size options: `w-72 h-72`
+- Update the Props type and sizeMap accordingly
 
-**Create / Join Group Popup:**
+## 4. Stronger Grainy Background
 
-- When "Create / Join group" is pressed, open a Dialog with two tabs:
-  - "Join" tab: text input for invite code + Join button
-  - "Create" tab: text input for group name, optional emoji picker for icon, Create button
+**Changes to `index.css`**:
+- Increase the grain overlay opacity from `0.12` to `0.3`
+- Increase the `baseFrequency` from `0.75` to `0.85` for a tighter, more visible grain pattern
 
-## 3. Gooey SVG Filter for Play Button Mitosis
+## 5. Starting Currency: 300 Paws
 
-Add an inline SVG `<filter>` element with a Gaussian blur + color matrix ("goo" effect) to `Home.tsx`. Wrap the play/pause/stop button area in a container that applies this filter. During the split animation, the buttons will appear to stretch and divide like a liquid droplet.
-
-The play button will be repositioned to overlap the animal character (moved up, higher z-index). Make the animal slightly larger (from `w-56 h-56` to `w-64 h-64` for "lg" size).
-
-## 4. Circular Group and Profile Icons
-
-Change the Home screen's Group and Profile floating buttons from `rounded-2xl` to `rounded-full` to make them circular.
-
-Change BottomNav tab buttons to also use circular styling.
-
-## 5. Grainy Background Effect
-
-Add a CSS pseudo-element or overlay with a noise/grain texture using an SVG `feTurbulence` filter applied as a background. Add this as a utility class `.grainy` in `index.css` and apply it to the Home screen's main container.
+**Changes to `AppContext.tsx`**:
+- Change the default paws from `0` to `300` in the `load("paws", 300)` call so new users start with 300 Paws to experiment with cosmetics
 
 ---
 
@@ -52,35 +43,29 @@ Add a CSS pseudo-element or overlay with a noise/grain texture using an SVG `feT
 
 ### Files Modified
 
+| File | Changes |
+|------|---------|
+| `src/pages/Home.tsx` | Reposition buttons inside animal wrapper, centered via absolute positioning. Remove `mode="wait"` from AnimatePresence. Use "xl" size for animal. |
+| `src/pages/Profile.tsx` | Use icon images for avatar. Add animal selection grid to change animal/theme. |
+| `src/components/AnimalCharacter.tsx` | Add "xl" size (`w-72 h-72`) to sizeMap and Props type. |
+| `src/index.css` | Increase grainy opacity to `0.3` and baseFrequency to `0.85`. |
+| `src/context/AppContext.tsx` | Change default paws fallback from `0` to `300`. |
 
-| File                                 | Changes                                                                                            |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `src/assets/`                        | 7 new image files copied                                                                           |
-| `src/components/AnimalCharacter.tsx` | Add active images for cat/dog/chicken, add icon images map, increase "lg" size                     |
-| `src/pages/Groups.tsx`               | Full redesign: status illustrations (active table vs idle table), invite popup, create/join popup  |
-| `src/pages/Home.tsx`                 | SVG goo filter on play button area, reposition buttons to overlap animal, circular icon buttons    |
-| `src/components/BottomNav.tsx`       | Circular icon styling                                                                              |
-| `src/index.css`                      | Add `.grainy` utility class with SVG noise overlay                                                 |
-| `src/context/AppContext.tsx`         | Add `inviteCode` field to `StudyGroup` interface, update mock data with animal-appropriate members |
-
-
-### Gooey Filter Implementation
-
+### Mitosis Animation Flow (Fixed)
 ```text
-SVG Filter Chain:
-  feGaussianBlur (stdDeviation=10)
-    -> feColorMatrix (boost alpha channel to create hard edges)
-    -> feBlend
+IDLE STATE:
+  - Single Play button centered on animal (z-index above animal)
+  - SVG goo filter applied to button container
 
-Applied to a wrapper <div> around the play/pause/stop buttons.
-The blur merges overlapping shapes, and the color matrix
-snaps the alpha back to create the "liquid blob" look.
+TRANSITION (click Play):
+  - Play button begins scaling down (scale: 1 -> 0)
+  - Simultaneously, Pause + Stop buttons appear at center (scale: 0 -> 1)
+  - Both sets of buttons are visible during crossover
+  - Goo filter merges overlapping shapes into liquid blob
+  - Pause slides left, Stop slides right
+
+RESULT:
+  - Two separated buttons flanking the animal
+  - Continuous visual presence throughout animation
 ```
 
-### Group Status Illustration Logic
-
-```text
-For each member in the leaderboard:
-  if status === "studying" -> show {animal}active.png (e.g. dogactive.png)
-  else (away/offline/in-event) -> show idletable.png (empty table)
-```
