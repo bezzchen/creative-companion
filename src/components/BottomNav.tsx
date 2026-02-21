@@ -32,7 +32,7 @@ const BottomNav = () => {
               layoutId={tab.layoutId}
               onClick={() => navigate(tab.path)}
               whileTap={{ scale: 0.9 }}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl transition-colors ${
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-full transition-colors ${
                 isActive ? "bg-primary/15" : ""
               }`}
             >

@@ -4,12 +4,33 @@ import catImg from "@/assets/cat.png";
 import dogImg from "@/assets/dog.png";
 import duckImg from "@/assets/duck.png";
 import bearActiveImg from "@/assets/bearactive.png";
+import catActiveImg from "@/assets/catactive.png";
+import dogActiveImg from "@/assets/dogactive.png";
+import chickenActiveImg from "@/assets/chickenactive.png";
+import bearIconImg from "@/assets/bearicon.png";
+import catIconImg from "@/assets/caticon.png";
+import dogIconImg from "@/assets/dogicon.png";
+import chickenIconImg from "@/assets/chickenicon.png";
 
 const animalImages: Record<AnimalType, string> = {
   bear: bearImg,
   cat: catImg,
   dog: dogImg,
   chicken: duckImg,
+};
+
+const animalActiveImages: Record<AnimalType, string> = {
+  bear: bearActiveImg,
+  cat: catActiveImg,
+  dog: dogActiveImg,
+  chicken: chickenActiveImg,
+};
+
+export const animalIconImages: Record<AnimalType, string> = {
+  bear: bearIconImg,
+  cat: catIconImg,
+  dog: dogIconImg,
+  chicken: chickenIconImg,
 };
 
 interface Props {
@@ -22,7 +43,7 @@ interface Props {
 const sizeMap = {
   sm: "w-16 h-16",
   md: "w-40 h-40",
-  lg: "w-56 h-56",
+  lg: "w-64 h-64",
 };
 
 const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false }: Props) => {
@@ -30,7 +51,7 @@ const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, acti
   const animal = animalProp || ctxAnimal;
   if (!animal) return null;
 
-  const img = active && animal === "bear" ? bearActiveImg : animalImages[animal];
+  const img = active ? animalActiveImages[animal] : animalImages[animal];
   const hatItem = equippedHat ? COSMETIC_STORE.find((c) => c.id === equippedHat) : null;
 
   return (
