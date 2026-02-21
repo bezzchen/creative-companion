@@ -16,16 +16,15 @@ const floatAnimation = {
 };
 
 const formatTime = (seconds: number) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
   const s = (seconds % 60).toString().padStart(2, "0");
   return `${m}:${s}`;
 };
 
 const Home = () => {
-  const {
-    paws, timerSeconds, timerRunning,
-    startTimer, pauseTimer, stopTimer,
-  } = useApp();
+  const { paws, timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer } = useApp();
   const navigate = useNavigate();
   const [isStudying, setIsStudying] = useState(false);
 
@@ -44,27 +43,11 @@ const Home = () => {
   }, [stopTimer]);
 
   return (
-    <div className="min-h-screen theme-gradient grainy flex flex-col relative overflow-hidden">
+    <div className="min-h-screen theme-gradient flex flex-col relative overflow-hidden">
       <BreakReminder />
 
-      {/* SVG Gooey Filter */}
-      <svg className="absolute w-0 h-0" aria-hidden="true">
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-              result="goo"
-            />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
-
       {/* Top Bar - Paws */}
-      <div className="flex justify-end items-center px-5 pt-6 pb-2 relative z-10">
+      <div className="flex justify-end items-center px-5 pt-6 pb-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -78,7 +61,7 @@ const Home = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
+      <div className="flex-1 flex flex-col items-center justify-center relative px-6">
         {/* Timer display */}
         <AnimatePresence>
           {isStudying && (
@@ -108,7 +91,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* Animal + Icons + Play Zone */}
+        {/* Animal + Icons Zone */}
         <div className="relative flex items-center justify-center">
           {/* Group icon - floating left */}
           <AnimatePresence>
@@ -120,7 +103,7 @@ const Home = () => {
                 exit={{ opacity: 0, x: 40, scale: 0.5 }}
                 transition={{ type: "spring", stiffness: 100 }}
                 onClick={() => navigate("/groups")}
-                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
+                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
                 <Users className="w-5 h-5 text-primary" />
               </motion.button>
@@ -140,7 +123,7 @@ const Home = () => {
                 exit={{ opacity: 0, x: -40, scale: 0.5 }}
                 transition={{ type: "spring", stiffness: 100 }}
                 onClick={() => navigate("/profile")}
-                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
+                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
                 <User className="w-5 h-5 text-primary" />
               </motion.button>
@@ -149,82 +132,72 @@ const Home = () => {
 
           {/* Animal */}
           <div className="relative z-10">
-            <AnimalCharacter size="lg" active={isStudying} />
-          </div>
-
-          {/* Play / Pause+Stop buttons - overlapping animal with gooey filter */}
-          <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-4 z-30"
-            style={{ filter: "url(#goo)" }}
-          >
-            <div className="relative h-16 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                {!isStudying ? (
-                  <motion.button
-                    key="play"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 1.4, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handlePlay}
-                    className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-xl glow-shadow"
-                  >
-                    <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
-                  </motion.button>
-                ) : (
-                  <motion.div
-                    key="controls"
-                    initial={{ width: 64 }}
-                    animate={{ width: 160 }}
-                    exit={{ width: 64, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 120, damping: 14 }}
-                    className="flex items-center justify-center gap-0"
-                  >
-                    <motion.button
-                      initial={{ x: 24 }}
-                      animate={{ x: 0 }}
-                      transition={{ type: "spring", stiffness: 120, damping: 12 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={timerRunning ? handlePause : startTimer}
-                      className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-lg"
-                    >
-                      {timerRunning ? (
-                        <Pause className="w-6 h-6 text-accent-foreground" fill="currentColor" />
-                      ) : (
-                        <Play className="w-6 h-6 text-accent-foreground ml-0.5" fill="currentColor" />
-                      )}
-                    </motion.button>
-
-                    <motion.button
-                      initial={{ x: -24 }}
-                      animate={{ x: 0 }}
-                      transition={{ type: "spring", stiffness: 120, damping: 12 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleStop}
-                      className="w-14 h-14 rounded-full bg-destructive flex items-center justify-center shadow-lg"
-                    >
-                      <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
-                    </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <AnimalCharacter size="xl" active={isStudying} />
           </div>
         </div>
 
-        {/* Spacer for the overlapping button */}
-        <div className="h-12" />
+        {/* Play / Pause+Stop buttons (Mitosis) */}
+        <div className="mt-6 relative h-16 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {!isStudying ? (
+              <motion.button
+                key="play"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handlePlay}
+                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-xl glow-shadow"
+              >
+                <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
+              </motion.button>
+            ) : (
+              <motion.div
+                key="controls"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 150, damping: 15 }}
+                className="flex items-center gap-8"
+              >
+                {/* Pause - splits left */}
+                <motion.button
+                  initial={{ x: 0 }}
+                  animate={{ x: 0 }}
+                  transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={timerRunning ? handlePause : startTimer}
+                  className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-lg"
+                >
+                  {timerRunning ? (
+                    <Pause className="w-6 h-6 text-accent-foreground" fill="currentColor" />
+                  ) : (
+                    <Play className="w-6 h-6 text-accent-foreground ml-0.5" fill="currentColor" />
+                  )}
+                </motion.button>
+
+                {/* Stop - splits right */}
+                <motion.button
+                  initial={{ x: 0 }}
+                  animate={{ x: 0 }}
+                  transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleStop}
+                  className="w-14 h-14 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                >
+                  <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {isStudying && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-4 text-sm text-muted-foreground"
-          >
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-sm text-muted-foreground">
             Earning 10 🐾 per minute
           </motion.p>
         )}
