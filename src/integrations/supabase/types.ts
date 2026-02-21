@@ -225,6 +225,10 @@ export type Database = {
       cancel_study_session: { Args: never; Returns: undefined }
       complete_study_session: { Args: never; Returns: Json }
       generate_invite_code: { Args: never; Returns: string }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
       join_group_by_code: { Args: { code: string }; Returns: string }
       start_study_session: { Args: never; Returns: string }
     }
