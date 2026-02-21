@@ -137,7 +137,7 @@ const Home = () => {
         </div>
 
         {/* Play / Pause+Stop buttons (Mitosis) */}
-        <div className="mt-2 relative h-16 flex items-center justify-center">
+        <div className="mt-2 relative h-2 flex items-center justify-center">
           <AnimatePresence mode="wait">
             {!isStudying ? (
               <motion.button
