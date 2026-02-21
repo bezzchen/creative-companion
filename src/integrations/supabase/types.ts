@@ -14,27 +14,190 @@ export type Database = {
   }
   public: {
     Tables: {
-      buildathon26: {
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          animal: string | null
+          created_at: string
+          equipped_background: string | null
+          equipped_border: string | null
+          equipped_hat: string | null
+          hours_studied: number
+          id: string
+          paws: number
+          status: string
+          streak: number
+          username: string
+        }
+        Insert: {
+          animal?: string | null
+          created_at?: string
+          equipped_background?: string | null
+          equipped_border?: string | null
+          equipped_hat?: string | null
+          hours_studied?: number
+          id: string
+          paws?: number
+          status?: string
+          streak?: number
+          username?: string
+        }
+        Update: {
+          animal?: string | null
+          created_at?: string
+          equipped_background?: string | null
+          equipped_border?: string | null
+          equipped_hat?: string | null
+          hours_studied?: number
+          id?: string
+          paws?: number
+          status?: string
+          streak?: number
+          username?: string
+        }
+        Relationships: []
+      }
+      study_groups: {
         Row: {
           created_at: string
-          id: number
+          created_by: string
+          icon: string
+          id: string
+          invite_code: string
+          name: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          created_by: string
+          icon?: string
+          id?: string
+          invite_code: string
+          name: string
         }
         Update: {
           created_at?: string
-          id?: number
+          created_by?: string
+          icon?: string
+          id?: string
+          invite_code?: string
+          name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "study_groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_sessions: {
+        Row: {
+          duration_seconds: number
+          ended_at: string
+          id: string
+          paws_earned: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          duration_seconds: number
+          ended_at?: string
+          id?: string
+          paws_earned: number
+          started_at: string
+          user_id: string
+        }
+        Update: {
+          duration_seconds?: number
+          ended_at?: string
+          id?: string
+          paws_earned?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_cosmetics: {
+        Row: {
+          cosmetic_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          cosmetic_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          cosmetic_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_cosmetics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_invite_code: { Args: never; Returns: string }
+      join_group_by_code: { Args: { code: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
