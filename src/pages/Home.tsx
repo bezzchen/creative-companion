@@ -131,8 +131,8 @@ const Home = () => {
           </AnimatePresence>
 
           {/* Animal */}
-          <div className="relative z-10">
-            <AnimalCharacter size="xl" active={isStudying} />
+          <div className="relative z-10 size-[320px]">
+            <AnimalCharacter size="lg" active={isStudying} />
           </div>
         </div>
 
