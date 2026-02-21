@@ -131,13 +131,13 @@ const Home = () => {
           </AnimatePresence>
 
           {/* Animal */}
-          <div className="relative z-10 w-[400px] h-[500px]">
+          <div className="relative z-10">
             <AnimalCharacter size="lg" active={isStudying} />
           </div>
         </div>
 
         {/* Play / Pause+Stop buttons (Mitosis) */}
-        <div className="mt-6 relative h-16 flex items-center justify-center">
+        <div className="mt-2 relative h-16 flex items-center justify-center">
           <AnimatePresence mode="wait">
             {!isStudying ? (
               <motion.button
