@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useApp, COSMETIC_STORE, CosmeticItem } from "@/context/AppContext";
-import { ChevronLeft, Check, ShoppingBag } from "lucide-react";
+import { ChevronLeft, Check, ShoppingBag, X } from "lucide-react";
 
 type Category = "hat" | "border" | "background";
 
@@ -13,7 +13,7 @@ const categoryLabels: Record<Category, { label: string; emoji: string }> = {
 };
 
 const Store = () => {
-  const { paws, ownedCosmetics, equippedHat, equippedBorder, equippedBackground, buyCosmetic, equipCosmetic } = useApp();
+  const { paws, ownedCosmetics, equippedHat, equippedBorder, equippedBackground, buyCosmetic, equipCosmetic, unequipCosmetic } = useApp();
   const [category, setCategory] = useState<Category>("hat");
   const navigate = useNavigate();
 
@@ -22,7 +22,11 @@ const Store = () => {
 
   const handleAction = (item: CosmeticItem) => {
     if (ownedCosmetics.includes(item.id)) {
-      equipCosmetic(item.id, item.category);
+      if (equipped === item.id) {
+        unequipCosmetic(item.category);
+      } else {
+        equipCosmetic(item.id, item.category);
+      }
     } else {
       buyCosmetic(item);
     }
@@ -80,10 +84,10 @@ const Store = () => {
                 <p className="font-bold text-foreground text-sm">{item.name}</p>
                 <button
                   onClick={() => handleAction(item)}
-                  disabled={isEquipped}
+                  disabled={!owned && paws < item.price}
                   className={`mt-3 w-full py-2 rounded-xl font-semibold text-sm transition-colors ${
                     isEquipped
-                      ? "bg-primary/20 text-primary"
+                      ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
                       : owned
                       ? "bg-accent text-accent-foreground hover:bg-accent/80"
                       : paws >= item.price
@@ -92,7 +96,7 @@ const Store = () => {
                   }`}
                 >
                   {isEquipped ? (
-                    <span className="flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Equipped</span>
+                    <span className="flex items-center justify-center gap-1"><X className="w-4 h-4" /> Unequip</span>
                   ) : owned ? (
                     "Equip"
                   ) : (

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useApp, StudyGroup, AnimalType, COSMETIC_STORE } from "@/context/AppContext";
+import { useApp, COSMETIC_STORE } from "@/context/AppContext";
+import { useGroups, GroupWithMembers } from "@/hooks/useGroups";
+import { useAuth } from "@/context/AuthContext";
+import { AnimalType } from "@/context/AppContext";
 import { Plus, ChevronLeft, Copy, Check } from "lucide-react";
 import { animalIconImages } from "@/components/AnimalCharacter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -25,8 +28,9 @@ const activeImages: Record<AnimalType, string> = {
 const rankLabels = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 
 const Groups = () => {
-  const { groups } = useApp();
-  const [selectedGroup, setSelectedGroup] = useState<StudyGroup | null>(null);
+  const { user } = useAuth();
+  const { groups, isLoading, createGroup, joinGroup } = useGroups();
+  const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [showCreateJoin, setShowCreateJoin] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -41,6 +45,30 @@ const Groups = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleJoin = async () => {
+    if (!joinCode.trim()) return;
+    try {
+      await joinGroup.mutateAsync(joinCode.trim());
+      toast.success("Joined group!");
+      setShowCreateJoin(false);
+      setJoinCode("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to join group");
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!newGroupName.trim()) return;
+    try {
+      await createGroup.mutateAsync({ name: newGroupName.trim(), icon: newGroupEmoji });
+      toast.success("Group created!");
+      setShowCreateJoin(false);
+      setNewGroupName("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create group");
+    }
+  };
+
   return (
     <div className="min-h-screen theme-gradient pb-28">
       <AnimatePresence mode="wait">
@@ -53,23 +81,29 @@ const Groups = () => {
             className="px-5 pt-8"
           >
             <h1 className="text-2xl font-extrabold text-foreground mb-6">My Study Groups</h1>
-            <div className="space-y-3">
-              {groups.map((g) => (
-                <motion.button
-                  key={g.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedGroup(g)}
-                  className="w-full flex items-center gap-4 p-4 bg-card/80 backdrop-blur-sm rounded-2xl shadow-sm border border-border/50 text-left"
-                >
-                  <span className="text-3xl">{g.icon}</span>
-                  <div className="flex-1">
-                    <p className="font-bold text-foreground">{g.name}</p>
-                    <p className="text-sm text-muted-foreground">{g.members.length} members</p>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
+            {isLoading ? (
+              <p className="text-muted-foreground text-center py-10">Loading groups...</p>
+            ) : groups.length === 0 ? (
+              <p className="text-muted-foreground text-center py-10">No groups yet. Create or join one!</p>
+            ) : (
+              <div className="space-y-3">
+                {groups.map((g) => (
+                  <motion.button
+                    key={g.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedGroup(g)}
+                    className="w-full flex items-center gap-4 p-4 bg-card/80 backdrop-blur-sm rounded-2xl shadow-sm border border-border/50 text-left"
+                  >
+                    <span className="text-3xl">{g.icon}</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-foreground">{g.name}</p>
+                      <p className="text-sm text-muted-foreground">{g.members.length} members</p>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -88,72 +122,65 @@ const Groups = () => {
             exit={{ opacity: 0, x: 20 }}
             className="px-5 pt-6"
           >
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <button onClick={() => setSelectedGroup(null)} className="p-2 -ml-2">
                   <ChevronLeft className="w-6 h-6 text-foreground" />
                 </button>
-                <h1 className="text-xl font-extrabold text-foreground">My Study Group</h1>
+                <h1 className="text-xl font-extrabold text-foreground">{selectedGroup.name}</h1>
               </div>
-              <Button
-                onClick={() => setShowInvite(true)}
-                size="sm"
-                className="rounded-full px-4 gap-1.5"
-              >
+              <Button onClick={() => setShowInvite(true)} size="sm" className="rounded-full px-4 gap-1.5">
                 <Plus className="w-4 h-4" />
                 Invite
               </Button>
             </div>
 
-            {/* Leaderboard */}
             <div className="space-y-3">
               {[...selectedGroup.members]
-                .sort((a, b) => b.hours - a.hours)
+                .sort((a, b) => (b.profile?.hours_studied ?? 0) - (a.profile?.hours_studied ?? 0))
                 .map((member, i) => {
-                  const borderItem = member.equippedBorder
-                    ? COSMETIC_STORE.find((c) => c.id === member.equippedBorder)
+                  const p = member.profile;
+                  if (!p) return null;
+                  const animalType = (p.animal as AnimalType) || "bear";
+                  const borderItem = p.equipped_border
+                    ? COSMETIC_STORE.find((c) => c.id === p.equipped_border)
                     : null;
-                  const statusImg = member.status === "studying"
-                    ? activeImages[member.animal]
+                  const statusImg = p.status === "studying"
+                    ? activeImages[animalType]
                     : idleTableImg;
+                  const isYou = member.user_id === user?.id;
 
                   return (
                     <motion.div
-                      key={member.id}
+                      key={member.user_id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.08 }}
                       className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/30"
                     >
-                      {/* Rank */}
                       <span className="text-sm font-bold text-muted-foreground w-8 text-center">
                         {rankLabels[i] || `${i + 1}th`}
                       </span>
-
-                      {/* Avatar */}
                       <div
                         className={`w-10 h-10 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center flex-shrink-0 ${
                           borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
                         }`}
                       >
                         <img
-                          src={animalIconImages[member.animal]}
-                          alt={member.animal}
+                          src={animalIconImages[animalType]}
+                          alt={animalType}
                           className="w-7 h-7 object-contain"
                         />
                       </div>
-
-                      {/* Name + hours */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground text-sm truncate">{member.name}</p>
-                        <p className="text-xs text-muted-foreground">{member.hours} hrs</p>
+                        <p className="font-bold text-foreground text-sm truncate">
+                          {isYou ? "You" : p.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{Number(p.hours_studied).toFixed(1)} hrs</p>
                       </div>
-
-                      {/* Status illustration */}
                       <img
                         src={statusImg}
-                        alt={member.status === "studying" ? "Studying" : "Idle"}
+                        alt={p.status === "studying" ? "Studying" : "Idle"}
                         className="w-16 h-12 object-contain flex-shrink-0"
                       />
                     </motion.div>
@@ -173,13 +200,13 @@ const Groups = () => {
           </DialogHeader>
           <div className="flex items-center gap-3 bg-muted rounded-xl p-4 mt-2">
             <span className="text-2xl font-mono font-bold text-foreground tracking-widest flex-1 text-center">
-              {selectedGroup?.inviteCode || "------"}
+              {selectedGroup?.invite_code || "------"}
             </span>
             <Button
               variant="ghost"
               size="icon"
               className="rounded-full"
-              onClick={() => handleCopyCode(selectedGroup?.inviteCode || "")}
+              onClick={() => handleCopyCode(selectedGroup?.invite_code || "")}
             >
               {copied ? <Check className="w-5 h-5 text-primary" /> : <Copy className="w-5 h-5" />}
             </Button>
@@ -207,8 +234,8 @@ const Groups = () => {
                 className="text-center font-mono tracking-widest text-lg"
                 maxLength={6}
               />
-              <Button className="w-full rounded-xl" onClick={() => { toast.success("Joined group!"); setShowCreateJoin(false); }}>
-                Join Group
+              <Button className="w-full rounded-xl" onClick={handleJoin} disabled={joinGroup.isPending}>
+                {joinGroup.isPending ? "Joining..." : "Join Group"}
               </Button>
             </TabsContent>
             <TabsContent value="create" className="space-y-3 pt-3">
@@ -230,8 +257,8 @@ const Groups = () => {
                   className="flex-1"
                 />
               </div>
-              <Button className="w-full rounded-xl" onClick={() => { toast.success("Group created!"); setShowCreateJoin(false); }}>
-                Create Group
+              <Button className="w-full rounded-xl" onClick={handleCreate} disabled={createGroup.isPending}>
+                {createGroup.isPending ? "Creating..." : "Create Group"}
               </Button>
             </TabsContent>
           </Tabs>

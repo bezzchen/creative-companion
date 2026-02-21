@@ -1,4 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { useProfile } from "@/hooks/useProfile";
+import { useCosmetics } from "@/hooks/useCosmetics";
+import { useStudySessions } from "@/hooks/useStudySessions";
+import { useAuth } from "@/context/AuthContext";
 
 export type AnimalType = "dog" | "cat" | "bear" | "chicken";
 export type UserStatus = "studying" | "in-event" | "away" | "offline";
@@ -8,7 +12,7 @@ export interface CosmeticItem {
   name: string;
   category: "hat" | "border" | "background";
   price: number;
-  preview: string; // emoji or CSS class
+  preview: string;
 }
 
 export interface GroupMember {
@@ -51,10 +55,11 @@ interface AppState {
   equippedBorder: string | null;
   equippedBackground: string | null;
   equipCosmetic: (id: string, category: "hat" | "border" | "background") => void;
+  unequipCosmetic: (category: "hat" | "border" | "background") => void;
   buyCosmetic: (item: CosmeticItem) => boolean;
-  groups: StudyGroup[];
   showBreakReminder: boolean;
   dismissBreakReminder: () => void;
+  profileLoading: boolean;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -81,95 +86,60 @@ export const COSMETIC_STORE: CosmeticItem[] = [
   { id: "bg-ocean", name: "Ocean", category: "background", price: 75, preview: "🌊" },
 ];
 
-const MOCK_GROUPS: StudyGroup[] = [
-  {
-    id: "1",
-    name: "Study Squad",
-    icon: "📚",
-    inviteCode: "SQ7K2X",
-    members: [
-      { id: "1", name: "Barry", animal: "bear", hours: 20, status: "studying", equippedHat: "hat-crown" },
-      { id: "2", name: "Emily", animal: "cat", hours: 4, status: "away" },
-      { id: "3", name: "Rex", animal: "dog", hours: 8, status: "studying" },
-      { id: "self", name: "You", animal: "bear", hours: 12, status: "studying" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Night Owls",
-    icon: "🦉",
-    inviteCode: "NW3P9L",
-    members: [
-      { id: "4", name: "Alex", animal: "dog", hours: 15, status: "in-event" },
-      { id: "5", name: "Clucky", animal: "chicken", hours: 6, status: "offline" },
-      { id: "self", name: "You", animal: "bear", hours: 12, status: "studying" },
-    ],
-  },
-];
-
-const load = <T,>(key: string, fallback: T): T => {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [animal, setAnimalState] = useState<AnimalType | null>(load("animal", null));
-  const [paws, setPaws] = useState(load("paws", 300));
+  const { user } = useAuth();
+  const { profile, isLoading: profileLoading, updateProfile } = useProfile();
+  const { ownedCosmetics, buyCosmetic: buyFromDb } = useCosmetics();
+  const { logSession } = useStudySessions();
+
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [status, setStatus] = useState<UserStatus>(load("status", "offline"));
-  const [username, setUsernameState] = useState(load("username", "StudyBuddy"));
-  const [hoursStudied] = useState(load("hoursStudied", 12.5));
-  const [streak] = useState(load("streak", 7));
-  const [ownedCosmetics, setOwnedCosmetics] = useState<string[]>(load("ownedCosmetics", []));
-  const [equippedHat, setEquippedHat] = useState<string | null>(load("equippedHat", null));
-  const [equippedBorder, setEquippedBorder] = useState<string | null>(load("equippedBorder", null));
-  const [equippedBackground, setEquippedBackground] = useState<string | null>(load("equippedBackground", null));
   const [showBreakReminder, setShowBreakReminder] = useState(false);
   const intervalRef = useRef<number | null>(null);
-  const lastPawMinuteRef = useRef(0);
+  const timerStartRef = useRef<Date | null>(null);
+
+  // Derived from profile
+  const animal = (profile?.animal as AnimalType) || null;
+  const paws = profile?.paws ?? 0;
+  const status = (profile?.status as UserStatus) ?? "offline";
+  const username = profile?.username ?? "StudyBuddy";
+  const hoursStudied = Number(profile?.hours_studied ?? 0);
+  const streak = profile?.streak ?? 0;
+  const equippedHat = profile?.equipped_hat ?? null;
+  const equippedBorder = profile?.equipped_border ?? null;
+  const equippedBackground = profile?.equipped_background ?? null;
 
   const setAnimal = useCallback((a: AnimalType) => {
-    setAnimalState(a);
-    localStorage.setItem("animal", JSON.stringify(a));
-  }, []);
+    updateProfile.mutate({ animal: a });
+  }, [updateProfile]);
 
   const setUsername = useCallback((n: string) => {
-    setUsernameState(n);
-    localStorage.setItem("username", JSON.stringify(n));
-  }, []);
+    updateProfile.mutate({ username: n });
+  }, [updateProfile]);
+
+  const setStatus = useCallback((s: UserStatus) => {
+    updateProfile.mutate({ status: s });
+  }, [updateProfile]);
 
   const addPaws = useCallback((n: number) => {
-    setPaws((p) => {
-      const next = p + n;
-      localStorage.setItem("paws", JSON.stringify(next));
-      return next;
-    });
-  }, []);
+    updateProfile.mutate({ paws: paws + n });
+  }, [updateProfile, paws]);
 
   const spendPaws = useCallback((n: number) => {
-    let success = false;
-    setPaws((p) => {
-      if (p >= n) {
-        success = true;
-        const next = p - n;
-        localStorage.setItem("paws", JSON.stringify(next));
-        return next;
-      }
-      return p;
-    });
-    return success;
-  }, []);
+    if (paws >= n) {
+      updateProfile.mutate({ paws: paws - n });
+      return true;
+    }
+    return false;
+  }, [updateProfile, paws]);
 
   const startTimer = useCallback(() => {
+    if (!timerRunning && timerSeconds === 0) {
+      timerStartRef.current = new Date();
+    }
     setTimerRunning(true);
-    setStatus("studying");
-    localStorage.setItem("status", JSON.stringify("studying"));
-  }, []);
+    updateProfile.mutate({ status: "studying" });
+  }, [timerRunning, timerSeconds, updateProfile]);
 
   const pauseTimer = useCallback(() => {
     setTimerRunning(false);
@@ -177,14 +147,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const stopTimer = useCallback(() => {
     setTimerRunning(false);
-    // Award paws for completed minutes
     const minutes = Math.floor(timerSeconds / 60);
-    if (minutes > 0) {
-      addPaws(minutes * 10);
+    const pawsEarned = minutes * 10;
+    if (timerSeconds > 0 && timerStartRef.current) {
+      logSession.mutate({
+        durationSeconds: timerSeconds,
+        pawsEarned,
+        startedAt: timerStartRef.current,
+      });
     }
     setTimerSeconds(0);
-    lastPawMinuteRef.current = 0;
-  }, [timerSeconds, addPaws]);
+    timerStartRef.current = null;
+  }, [timerSeconds, logSession]);
 
   // Timer interval
   useEffect(() => {
@@ -192,10 +166,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       intervalRef.current = window.setInterval(() => {
         setTimerSeconds((s) => {
           const next = s + 1;
-          // Check for break reminder at 45 minutes
-          if (next === 45 * 60) {
-            setShowBreakReminder(true);
-          }
+          if (next === 45 * 60) setShowBreakReminder(true);
           return next;
         });
       }, 1000);
@@ -213,35 +184,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const buyCosmetic = useCallback((item: CosmeticItem) => {
     if (paws < item.price || ownedCosmetics.includes(item.id)) return false;
-    const newPaws = paws - item.price;
-    const newOwned = [...ownedCosmetics, item.id];
-    setPaws(newPaws);
-    setOwnedCosmetics(newOwned);
-    localStorage.setItem("paws", JSON.stringify(newPaws));
-    localStorage.setItem("ownedCosmetics", JSON.stringify(newOwned));
+    updateProfile.mutate({ paws: paws - item.price });
+    buyFromDb.mutate(item.id);
     return true;
-  }, [paws, ownedCosmetics]);
+  }, [paws, ownedCosmetics, updateProfile, buyFromDb]);
 
   const equipCosmetic = useCallback((id: string, category: "hat" | "border" | "background") => {
-    if (category === "hat") {
-      setEquippedHat(id);
-      localStorage.setItem("equippedHat", JSON.stringify(id));
-    } else if (category === "border") {
-      setEquippedBorder(id);
-      localStorage.setItem("equippedBorder", JSON.stringify(id));
-    } else {
-      setEquippedBackground(id);
-      localStorage.setItem("equippedBackground", JSON.stringify(id));
-    }
-  }, []);
+    if (category === "hat") updateProfile.mutate({ equipped_hat: id });
+    else if (category === "border") updateProfile.mutate({ equipped_border: id });
+    else updateProfile.mutate({ equipped_background: id });
+  }, [updateProfile]);
 
-  // Apply theme class to document
+  const unequipCosmetic = useCallback((category: "hat" | "border" | "background") => {
+    if (category === "hat") updateProfile.mutate({ equipped_hat: null });
+    else if (category === "border") updateProfile.mutate({ equipped_border: null });
+    else updateProfile.mutate({ equipped_background: null });
+  }, [updateProfile]);
+
+  // Apply theme class
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("theme-dog", "theme-cat", "theme-bear", "theme-chicken");
-    if (animal) {
-      root.classList.add(`theme-${animal}`);
-    }
+    if (animal) root.classList.add(`theme-${animal}`);
   }, [animal]);
 
   return (
@@ -252,8 +216,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status, setStatus, username, setUsername,
         hoursStudied, streak, ownedCosmetics,
         equippedHat, equippedBorder, equippedBackground,
-        equipCosmetic, buyCosmetic,
-        groups: MOCK_GROUPS, showBreakReminder, dismissBreakReminder,
+        equipCosmetic, unequipCosmetic, buyCosmetic,
+        showBreakReminder, dismissBreakReminder, profileLoading,
       }}
     >
       {children}
