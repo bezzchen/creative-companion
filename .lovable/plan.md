@@ -1,71 +1,127 @@
 
 
-# Play Button, Profile, Grainy Effect, and Starting Currency Fixes
+# Supabase Backend Integration
 
-## 1. Play Button Centered on Animal with Gooey Mitosis Fix
+## Overview
 
-**Problem**: The play button is below the animal instead of overlapping it, and during the mitosis animation the play button disappears before pause/stop appear (due to `AnimatePresence mode="wait"`).
+Replace all localStorage-based state with persistent Supabase tables and add authentication. The existing `buildathon26` table will be dropped and replaced with purpose-built tables.
 
-**Fix in `Home.tsx`**:
-- Move the play/pause/stop button container inside the animal's relative wrapper, absolutely positioned and centered both vertically and horizontally on top of the animal
-- Remove `AnimatePresence mode="wait"` so both the play button and the splitting buttons can be visible simultaneously during the transition
-- The play button should scale down and fade while the pause/stop buttons scale up from center, creating a continuous visible gooey blob effect
-- Apply the SVG goo filter to the wrapper so the overlapping circular shapes merge visually during transition
-- Increase animal size from `w-64 h-64` to `w-72 h-72` (new "xl" size)
+## 1. Authentication
 
-## 2. Profile Page - Animal Selector and Icon Usage
+Add email/password signup and login using Supabase Auth. Create an `/auth` page with login/signup tabs. Protect all routes behind auth. On signup, a database trigger auto-creates a profile row.
 
-**Changes to `Profile.tsx`**:
-- Use the animal **icon** image (`animalIconImages`) instead of the full animal PNG for the profile avatar
-- Add an "Edit Animal" section below the avatar: show all 4 animal options as small circular buttons. Tapping one calls `setAnimal()` which updates the global theme instantly
-- Import `animalIconImages` from `AnimalCharacter.tsx` for the avatar display
+## 2. Database Schema
 
-## 3. AnimalCharacter - Add "xl" Size
+### Tables to Create
 
-**Changes to `AnimalCharacter.tsx`**:
-- Add `"xl"` to the size options: `w-72 h-72`
-- Update the Props type and sizeMap accordingly
+**profiles**
+- `id` (uuid, PK, references auth.users)
+- `username` (text, default 'StudyBuddy')
+- `animal` (text, nullable - bear/cat/dog/chicken)
+- `status` (text, default 'offline')
+- `paws` (integer, default 300)
+- `hours_studied` (numeric, default 0)
+- `streak` (integer, default 0)
+- `equipped_hat` (text, nullable)
+- `equipped_border` (text, nullable)
+- `equipped_background` (text, nullable)
+- `created_at` (timestamptz)
 
-## 4. Stronger Grainy Background
+**user_cosmetics** (owned items)
+- `id` (uuid, PK)
+- `user_id` (uuid, references profiles.id)
+- `cosmetic_id` (text, not null) -- e.g. "hat-crown"
+- `purchased_at` (timestamptz)
+- unique(user_id, cosmetic_id)
 
-**Changes to `index.css`**:
-- Increase the grain overlay opacity from `0.12` to `0.3`
-- Increase the `baseFrequency` from `0.75` to `0.85` for a tighter, more visible grain pattern
+**study_groups**
+- `id` (uuid, PK)
+- `name` (text)
+- `icon` (text, default book emoji)
+- `invite_code` (text, unique, 6 chars)
+- `created_by` (uuid, references profiles.id)
+- `created_at` (timestamptz)
 
-## 5. Starting Currency: 300 Paws
+**group_members**
+- `id` (uuid, PK)
+- `group_id` (uuid, references study_groups.id on delete cascade)
+- `user_id` (uuid, references profiles.id on delete cascade)
+- `joined_at` (timestamptz)
+- unique(group_id, user_id)
 
-**Changes to `AppContext.tsx`**:
-- Change the default paws from `0` to `300` in the `load("paws", 300)` call so new users start with 300 Paws to experiment with cosmetics
+**study_sessions** (completed timer sessions)
+- `id` (uuid, PK)
+- `user_id` (uuid, references profiles.id)
+- `duration_seconds` (integer)
+- `paws_earned` (integer)
+- `started_at` (timestamptz)
+- `ended_at` (timestamptz, default now())
 
----
+### Table to Drop
+- `buildathon26` (unused placeholder)
 
-## Technical Details
+### RLS Policies
 
-### Files Modified
+All tables have RLS enabled:
+- **profiles**: Users can read all profiles (for group leaderboards), update only their own
+- **user_cosmetics**: Users can read/insert/delete only their own
+- **study_groups**: Authenticated users can read groups they belong to, insert new groups
+- **group_members**: Members can read members of their groups, insert (join), delete own membership
+- **study_sessions**: Users can read/insert only their own
+
+### Database Functions and Triggers
+- `handle_new_user()` trigger: auto-create profile row on auth.users insert
+- `generate_invite_code()`: generate random 6-char alphanumeric code for new groups
+- `join_group_by_code(code text)`: look up group by invite code, insert membership
+
+## 3. Frontend Changes
+
+### New Files
+- `src/pages/Auth.tsx` - Login/signup page with tabs
+- `src/context/AuthContext.tsx` - Auth state provider (session, user, loading)
+- `src/hooks/useProfile.ts` - Fetch and update profile from Supabase
+- `src/hooks/useCosmetics.ts` - Fetch owned cosmetics, buy, equip/unequip
+- `src/hooks/useGroups.ts` - Fetch groups, create, join by code
+- `src/hooks/useStudySessions.ts` - Log completed sessions
+
+### Modified Files
 
 | File | Changes |
 |------|---------|
-| `src/pages/Home.tsx` | Reposition buttons inside animal wrapper, centered via absolute positioning. Remove `mode="wait"` from AnimatePresence. Use "xl" size for animal. |
-| `src/pages/Profile.tsx` | Use icon images for avatar. Add animal selection grid to change animal/theme. |
-| `src/components/AnimalCharacter.tsx` | Add "xl" size (`w-72 h-72`) to sizeMap and Props type. |
-| `src/index.css` | Increase grainy opacity to `0.3` and baseFrequency to `0.85`. |
-| `src/context/AppContext.tsx` | Change default paws fallback from `0` to `300`. |
+| `src/App.tsx` | Add AuthProvider, redirect unauthenticated users to `/auth` |
+| `src/context/AppContext.tsx` | Replace localStorage with Supabase hooks; keep timer logic local (it only persists on stop) |
+| `src/pages/Onboarding.tsx` | On animal pick, update profile in Supabase |
+| `src/pages/Home.tsx` | Timer stop saves a study_session and updates profile hours/paws in Supabase |
+| `src/pages/Profile.tsx` | Animal change and status change update profile in Supabase |
+| `src/pages/Store.tsx` | Buy inserts into user_cosmetics, equip updates profile equipped columns |
+| `src/pages/Groups.tsx` | Create/join groups via Supabase; leaderboard reads real member profiles |
+| `src/components/BottomNav.tsx` | Add logout option or move to profile |
 
-### Mitosis Animation Flow (Fixed)
+### Auth Flow
 ```text
-IDLE STATE:
-  - Single Play button centered on animal (z-index above animal)
-  - SVG goo filter applied to button container
-
-TRANSITION (click Play):
-  - Play button begins scaling down (scale: 1 -> 0)
-  - Simultaneously, Pause + Stop buttons appear at center (scale: 0 -> 1)
-  - Both sets of buttons are visible during crossover
-  - Goo filter merges overlapping shapes into liquid blob
-  - Pause slides left, Stop slides right
-
-RESULT:
-  - Two separated buttons flanking the animal
-  - Continuous visual presence throughout animation
+App loads
+  -> AuthContext checks session via onAuthStateChange
+  -> If no session -> redirect to /auth
+  -> If session but no animal -> redirect to / (onboarding)
+  -> If session and animal -> redirect to /home
 ```
+
+### Timer Persistence Logic
+```text
+Timer runs client-side (useState + setInterval, same as now)
+On stopTimer():
+  1. Calculate duration and paws earned
+  2. Insert into study_sessions table
+  3. Update profile: increment hours_studied, add paws
+  4. Refetch profile data
+```
+
+## 4. Migration SQL Summary
+
+The migration will:
+1. Drop `buildathon26` table
+2. Create `profiles`, `user_cosmetics`, `study_groups`, `group_members`, `study_sessions`
+3. Enable RLS on all tables with appropriate policies
+4. Create `handle_new_user` trigger function + trigger
+5. Create `generate_invite_code` and `join_group_by_code` functions
 
