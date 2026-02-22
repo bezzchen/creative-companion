@@ -93,12 +93,12 @@ const Groups = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedGroup(g)}
-                    className="w-full flex items-center gap-4 p-4 bg-card/80 backdrop-blur-sm rounded-2xl shadow-sm border border-border/50 text-left"
+                    className="w-full flex items-center gap-4 p-5 bg-card/80 backdrop-blur-sm rounded-2xl shadow-sm border border-border/50 text-left"
                   >
-                    <span className="text-3xl">{g.icon}</span>
+                    <span className="text-4xl">{g.icon}</span>
                     <div className="flex-1">
-                      <p className="font-bold text-foreground">{g.name}</p>
-                      <p className="text-sm text-muted-foreground">{g.members.length} members</p>
+                      <p className="font-bold text-lg text-foreground">{g.name}</p>
+                      <p className="text-base text-muted-foreground">{g.members.length} members</p>
                     </div>
                   </motion.button>
                 ))}
@@ -156,32 +156,32 @@ const Groups = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.08 }}
-                      className="flex items-center gap-3 p-3 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/30"
+                      className="flex items-center gap-3 p-4 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/30"
                     >
-                      <span className="text-sm font-bold text-muted-foreground w-8 text-center">
+                      <span className="text-base font-bold text-muted-foreground w-8 text-center">
                         {rankLabels[i] || `${i + 1}th`}
                       </span>
                       <div
-                        className={`w-10 h-10 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center flex-shrink-0 ${
+                        className={`w-14 h-14 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center flex-shrink-0 ${
                           borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
                         }`}
                       >
                         <img
                           src={animalIconImages[animalType]}
                           alt={animalType}
-                          className="w-7 h-7 object-contain"
+                          className="w-10 h-10 object-contain"
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground text-sm truncate">
+                        <p className="font-bold text-foreground text-base truncate">
                           {isYou ? "You" : p.username}
                         </p>
-                        <p className="text-xs text-muted-foreground">{Number(p.hours_studied).toFixed(1)} hrs</p>
+                        <p className="text-sm text-muted-foreground">{Number(p.hours_studied).toFixed(1)} hrs</p>
                       </div>
                       <img
                         src={statusImg}
-                        alt={p.status === "studying" ? "Studying" : "Idle"}
-                        className="w-16 h-12 object-contain flex-shrink-0"
+                        alt={p.status === "studying" ? "Studying" : "Idle / Offline"}
+                        className="w-20 h-16 object-contain flex-shrink-0"
                       />
                     </motion.div>
                   );
