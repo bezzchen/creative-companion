@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { LayoutGroup } from "framer-motion";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AppProvider, useApp } from "@/context/AppContext";
 import BottomNav from "@/components/BottomNav";
@@ -27,7 +28,7 @@ const ProtectedRoutes = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
-    <>
+    <LayoutGroup>
       <Routes>
         <Route path="/" element={animal ? <Navigate to="/home" replace /> : <Onboarding />} />
         <Route path="/home" element={animal ? <Home /> : <Navigate to="/" replace />} />
@@ -37,7 +38,7 @@ const ProtectedRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <BottomNav />
-    </>
+    </LayoutGroup>
   );
 };
 
