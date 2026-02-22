@@ -1,19 +1,52 @@
 
 
-## Move Paw Icon to Top-Left of Home Page
+## Redesign Login Page to Match Screenshot
 
-### Problem
-The paw icon is currently placed inside the animal character container with `right-[150px]`, which puts it on the right side and tied to the animal's position. It should be at the very top-left corner of the page.
+### Overview
+Redesign the Auth page to match the uploaded screenshot layout: logo at top, form fields in a card, a speech bubble with a random message, and a random idle-animated animal character at the bottom.
 
-### Solution
-Move the paw icon out of the animal container and place it as a fixed/absolute element at the top-left of the main content area, using `left-6 top-6` positioning (similar to a page-level floating button).
+### Layout (top to bottom)
+1. **Logo**: `longlogo.png` image centered at top
+2. **Form card**: White rounded card with Email and Password fields, plus Sign In/Sign Up button
+3. **Speech bubble**: Displays contextual message ("Welcome back!" or "Create your account") with bobbing animation and a downward-pointing tail -- same style as Home page
+4. **Animal character**: Random animal (bear/cat/dog/chicken) with the 2-frame idle animation, displayed at the bottom of the screen
+5. **Toggle link**: "Don't have an account? Sign up" at the very bottom
 
-### Changes
+### Technical Details
 
-**`src/pages/Home.tsx`**
-- Remove the paw icon block from inside the `<div className="relative flex items-center justify-center">` container (lines 145-158)
-- Add it instead right after the main content div opens (after line 96), as an absolutely positioned element with `left-6 top-6 z-20` so it sits at the top-left of the page
+**`src/pages/Auth.tsx`** -- Full rewrite of the component:
+- Import `longlogo.png`, `framer-motion` (`motion`, `AnimatePresence`), and animal images (all 4 animals + their long1 variants)
+- Use `useMemo` to pick a random animal on mount
+- Use `useState` + `useEffect` for 2-frame idle animation (750ms interval, same as `AnimalCharacter.tsx`)
+- Replace the header text with `<img src={longLogo} />` 
+- Keep the form with same functionality (email, password, submit, error handling)
+- Add speech bubble (bobbing `y: [0, -8, 0]` animation) displaying the login/signup message
+- Render the random animal at the bottom with idle animation
+- Style the background to match the screenshot (light blue gradient)
+
+**Animal idle animation** (same logic as AnimalCharacter.tsx):
+```text
+const animals = [
+  { idle: bearImg, long: bearLong1 },
+  { idle: catImg, long: catLong1 },
+  { idle: dogImg, long: dogLong1 },
+  { idle: duckImg, long: duckLong1 },
+];
+// Pick random on mount, cycle frames every 750ms
+```
+
+**Speech bubble** (same pattern as Home.tsx):
+```text
+<motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity }}>
+  <div className="bg-card/90 rounded-2xl px-10 py-6 shadow-lg border ...">
+    <p>{isLogin ? "Welcome back!" : "Create your account"}</p>
+    <div className="absolute -bottom-2 ... rotate-45" /> <!-- tail -->
+  </div>
+</motion.div>
+```
+
+**Asset**: `longlogo.png` is already at `src/assets/longlogo.png` -- just needs to be imported.
 
 ### Files changed
-- `src/pages/Home.tsx`
+- `src/pages/Auth.tsx`
 
