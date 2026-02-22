@@ -117,7 +117,7 @@ const Auth = () => {
         <img
           src={frame === 0 ? animal.idle : animal.long}
           alt="Animal character"
-          className="w-90 h-90 object-contain"
+          className="w-82 h-82 object-contain"
         />
       </div>
 
