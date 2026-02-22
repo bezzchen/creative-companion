@@ -62,9 +62,9 @@ const Home = () => {
             {isStudying && (
               <motion.div
                 key="timer"
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 200 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
+                exit={{ opacity: 0, y: 200 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="mb-[-2rem] z-0 relative"
               >
@@ -81,6 +81,7 @@ const Home = () => {
             {/* Group icon - floating left */}
             {!isStudying && (
               <motion.button
+                layoutId="groups-icon"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }}
                 onClick={() => navigate("/groups")}
@@ -93,6 +94,7 @@ const Home = () => {
             {/* Profile icon - floating right */}
             {!isStudying && (
               <motion.button
+                layoutId="profile-icon"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
                 onClick={() => navigate("/profile")}
@@ -110,28 +112,28 @@ const Home = () => {
               <div className="absolute inset-0 flex items-center justify-center z-30">
                 {/* Play/Pause button */}
                 <motion.button
-                  animate={{ x: isStudying ? -60 : 0 }}
+                  animate={{ x: isStudying ? -72 : 0 }}
                   transition={springTransition}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={isStudying ? (timerRunning ? handlePause : startTimer) : handlePlay}
-                  className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl ${
+                  className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl ${
                     isStudying ? "bg-accent" : "bg-primary glow-shadow"
                   }`}
                 >
                   {isStudying && !timerRunning ? (
-                    <Play className="w-9 h-9 text-accent-foreground ml-1" fill="currentColor" />
+                    <Play className="w-11 h-11 text-accent-foreground ml-1" fill="currentColor" />
                   ) : isStudying ? (
-                    <Pause className="w-9 h-9 text-accent-foreground" fill="currentColor" />
+                    <Pause className="w-11 h-11 text-accent-foreground" fill="currentColor" />
                   ) : (
-                    <Play className="w-9 h-9 text-primary-foreground ml-1" fill="currentColor" />
+                    <Play className="w-11 h-11 text-primary-foreground ml-1" fill="currentColor" />
                   )}
                 </motion.button>
 
                 {/* Stop button */}
                 <motion.button
                   animate={{
-                    x: isStudying ? 60 : 0,
+                    x: isStudying ? 72 : 0,
                     opacity: isStudying ? 1 : 0,
                     scale: isStudying ? 1 : 0.5,
                   }}
@@ -139,7 +141,7 @@ const Home = () => {
                   whileHover={isStudying ? { scale: 1.1 } : undefined}
                   whileTap={isStudying ? { scale: 0.9 } : undefined}
                   onClick={isStudying ? handleStop : undefined}
-                  className="absolute w-20 h-20 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                  className="absolute w-24 h-24 rounded-full bg-destructive flex items-center justify-center shadow-lg"
                   style={{ pointerEvents: isStudying ? "auto" : "none" }}
                 >
                   <Square className="w-7 h-7 text-destructive-foreground" fill="currentColor" />
