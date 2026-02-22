@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Home, Users, User } from "lucide-react";
+import { Users, User } from "lucide-react";
+import pawIcon from "@/assets/paw.png";
 
 const tabs = [
-  { path: "/home", label: "Home", icon: Home, layoutId: undefined as string | undefined },
+  { path: "/home", label: "Home", icon: null, layoutId: "home-icon" },
   { path: "/groups", label: "Groups", icon: Users, layoutId: "groups-icon" },
   { path: "/profile", label: "Profile", icon: User, layoutId: "profile-icon" },
 ];
@@ -25,7 +26,6 @@ const BottomNav = () => {
       <div className="mx-4 mb-4 bg-card/90 backdrop-blur-xl rounded-3xl shadow-xl border border-border/50 flex items-center justify-around py-3 px-2">
         {tabs.map((tab) => {
           const isActive = location.pathname.startsWith(tab.path);
-          const Icon = tab.icon;
           return (
             <motion.button
               key={tab.path}
@@ -36,9 +36,13 @@ const BottomNav = () => {
               }`}
             >
               <motion.div layoutId={tab.layoutId}>
-                <Icon
-                  className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted-foreground"}`}
-                />
+                {tab.icon ? (
+                  <tab.icon
+                    className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                  />
+                ) : (
+                  <img src={pawIcon} alt={tab.label} className="w-5 h-5 object-contain" />
+                )}
               </motion.div>
               <span
                 className={`text-[11px] font-medium ${
