@@ -52,14 +52,14 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between px-6 py-10 bg-gradient-to-b from-[hsl(200,80%,92%)] to-background">
+    <div className="min-h-screen flex flex-col items-center justify-start px-6 py-6 bg-gradient-to-b from-[hsl(200,80%,92%)] to-background">
       {/* Logo */}
       <motion.img
         src={longLogo}
         alt="Study Buddy"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="h-12 object-contain mt-4"
+        className="h-12 object-contain mt-2 mb-4"
       />
 
       {/* Form Card */}
@@ -68,7 +68,7 @@ const Auth = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 bg-card rounded-3xl p-6 shadow-lg border border-border"
+        className="w-full max-w-sm space-y-4 bg-card rounded-3xl p-6 shadow-lg border border-border mt-4"
       >
         <input
           type="email"
@@ -97,7 +97,7 @@ const Auth = () => {
       </motion.form>
 
       {/* Speech Bubble + Animal */}
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center justify-center flex-1">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -114,14 +114,14 @@ const Auth = () => {
         <img
           src={frame === 0 ? animal.idle : animal.long}
           alt="Animal character"
-          className="w-32 h-32 object-contain"
+          className="w-96 h-96 object-contain"
         />
       </div>
 
       {/* Toggle */}
       <button
         onClick={() => setIsLogin(!isLogin)}
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors pb-4"
       >
         {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
       </button>
