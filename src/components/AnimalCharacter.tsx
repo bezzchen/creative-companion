@@ -82,13 +82,7 @@ const sizeMap = {
   "2xl": "w-[36rem] h-[36rem]",
 };
 
-const AnimalCharacter = ({
-  size = "lg",
-  animal: animalProp,
-  showHat = true,
-  active = false,
-  paused = false,
-}: Props) => {
+const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false, paused = false }: Props) => {
   const { animal: ctxAnimal, equippedHat } = useApp();
   const animal = animalProp || ctxAnimal;
   const [frameIndex, setFrameIndex] = useState(0);
@@ -121,12 +115,7 @@ const AnimalCharacter = ({
 
   return (
     <div className={`relative ${sizeMap[size]} flex-shrink-0`}>
-      <img
-        src={img}
-        alt={animal}
-        className={`w-full h-full object-contain drop-shadow-lg ${paused ? "translate-y-6" : ""}`}
-        draggable={false}
-      />
+      <img src={img} alt={animal} className="w-full h-full object-contain drop-shadow-lg" draggable={false} />
     </div>
   );
 };
