@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+import mygroupImg from "@/assets/mygroup.png";
 import bearActiveImg from "@/assets/bearactive.png";
 import catActiveImg from "@/assets/catactive.png";
 import dogActiveImg from "@/assets/dogactive.png";
@@ -89,7 +90,10 @@ const Groups = () => {
             exit={{ opacity: 0, x: -20 }}
             className="px-5 pt-8"
           >
-            <h1 className="text-2xl font-extrabold text-foreground mb-6">My Study Groups</h1>
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-extrabold text-foreground">My Study Groups</h1>
+              <img src={mygroupImg} alt="My Group" className="w-12 h-12 object-contain" />
+            </div>
             {isLoading ? (
               <p className="text-muted-foreground text-center py-10">Loading groups...</p>
             ) : groups.length === 0 ? (
