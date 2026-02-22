@@ -116,7 +116,7 @@ const Home = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={isStudying ? (timerRunning ? handlePause : startTimer) : handlePlay}
-                className={`w-25 h-25 rounded-full flex items-center justify-center shadow-xl ${
+                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-xl ${
                   isStudying ? "bg-accent" : "bg-primary glow-shadow"
                 }`}
               >
@@ -140,7 +140,7 @@ const Home = () => {
                 whileHover={isStudying ? { scale: 1.1 } : undefined}
                 whileTap={isStudying ? { scale: 0.9 } : undefined}
                 onClick={isStudying ? handleStop : undefined}
-                className="absolute w-25 h-25 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                className="absolute w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
                 style={{ pointerEvents: isStudying ? "auto" : "none" }}
               >
                 <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
