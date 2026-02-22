@@ -1,23 +1,21 @@
 
 
-## Adjust Auth Page Layout
+## Tighten Auth Page Spacing
 
-### Overview
-Move the form card higher up on the page and make the animal character 3x larger (from `w-32 h-32` to `w-96 h-96`). Adjust spacing so everything fits well together.
+### Problem
+The `flex-1` on the speech bubble + animal container is stretching it to fill all remaining space, pushing the speech bubble too high and the toggle link too low. The animal's large size (`w-96 h-96`) adds extra whitespace.
 
 ### Changes to `src/pages/Auth.tsx`
 
-1. **Change the main container layout**: Switch from `justify-between` to `justify-start` with a small top gap, so the logo and form sit near the top rather than being evenly spaced across the full height.
+1. **Remove `flex-1` from the animal container** (line 100): Change from `flex flex-col items-center justify-center flex-1` to just `flex flex-col items-center mt-4` -- this stops it from stretching to fill all available space and instead sits naturally below the form.
 
-2. **Reduce logo top margin**: Change `mt-4` to `mt-2` and add a small bottom margin.
+2. **Reduce speech bubble bottom margin** (line 104): Change `mb-2` to `mb-0` so the bubble sits closer to the animal.
 
-3. **Add margin below the form**: Add `mt-4` to the form so it sits right after the logo, pushed toward the top of the page.
+3. **Remove bottom padding from toggle** (line 124): Change `pb-4` to `py-2` so the toggle sits closer to the animal rather than being pushed to the very bottom.
 
-4. **Make the animal 3x larger**: Change `w-32 h-32` to `w-96 h-96` on the animal image.
+4. **Reduce animal image size slightly**: Change `w-96 h-96` to `w-80 h-80` -- still ~2.5x the original but takes up less vertical space.
 
-5. **Let the animal + speech bubble fill remaining space**: Use `flex-1` on the speech bubble + animal container so it occupies the remaining vertical space and centers the animal naturally below the form.
-
-6. **Move toggle link**: Add `pb-4` to keep the toggle at the bottom with minimal padding.
+These changes will bring the speech bubble, animal, and toggle link closer together vertically while keeping the form near the top.
 
 ### Files changed
 - `src/pages/Auth.tsx`
