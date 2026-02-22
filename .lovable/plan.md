@@ -1,51 +1,23 @@
 
 
-## Redesign Login Page to Match Screenshot
+## Adjust Auth Page Layout
 
 ### Overview
-Redesign the Auth page to match the uploaded screenshot layout: logo at top, form fields in a card, a speech bubble with a random message, and a random idle-animated animal character at the bottom.
+Move the form card higher up on the page and make the animal character 3x larger (from `w-32 h-32` to `w-96 h-96`). Adjust spacing so everything fits well together.
 
-### Layout (top to bottom)
-1. **Logo**: `longlogo.png` image centered at top
-2. **Form card**: White rounded card with Email and Password fields, plus Sign In/Sign Up button
-3. **Speech bubble**: Displays contextual message ("Welcome back!" or "Create your account") with bobbing animation and a downward-pointing tail -- same style as Home page
-4. **Animal character**: Random animal (bear/cat/dog/chicken) with the 2-frame idle animation, displayed at the bottom of the screen
-5. **Toggle link**: "Don't have an account? Sign up" at the very bottom
+### Changes to `src/pages/Auth.tsx`
 
-### Technical Details
+1. **Change the main container layout**: Switch from `justify-between` to `justify-start` with a small top gap, so the logo and form sit near the top rather than being evenly spaced across the full height.
 
-**`src/pages/Auth.tsx`** -- Full rewrite of the component:
-- Import `longlogo.png`, `framer-motion` (`motion`, `AnimatePresence`), and animal images (all 4 animals + their long1 variants)
-- Use `useMemo` to pick a random animal on mount
-- Use `useState` + `useEffect` for 2-frame idle animation (750ms interval, same as `AnimalCharacter.tsx`)
-- Replace the header text with `<img src={longLogo} />` 
-- Keep the form with same functionality (email, password, submit, error handling)
-- Add speech bubble (bobbing `y: [0, -8, 0]` animation) displaying the login/signup message
-- Render the random animal at the bottom with idle animation
-- Style the background to match the screenshot (light blue gradient)
+2. **Reduce logo top margin**: Change `mt-4` to `mt-2` and add a small bottom margin.
 
-**Animal idle animation** (same logic as AnimalCharacter.tsx):
-```text
-const animals = [
-  { idle: bearImg, long: bearLong1 },
-  { idle: catImg, long: catLong1 },
-  { idle: dogImg, long: dogLong1 },
-  { idle: duckImg, long: duckLong1 },
-];
-// Pick random on mount, cycle frames every 750ms
-```
+3. **Add margin below the form**: Add `mt-4` to the form so it sits right after the logo, pushed toward the top of the page.
 
-**Speech bubble** (same pattern as Home.tsx):
-```text
-<motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity }}>
-  <div className="bg-card/90 rounded-2xl px-10 py-6 shadow-lg border ...">
-    <p>{isLogin ? "Welcome back!" : "Create your account"}</p>
-    <div className="absolute -bottom-2 ... rotate-45" /> <!-- tail -->
-  </div>
-</motion.div>
-```
+4. **Make the animal 3x larger**: Change `w-32 h-32` to `w-96 h-96` on the animal image.
 
-**Asset**: `longlogo.png` is already at `src/assets/longlogo.png` -- just needs to be imported.
+5. **Let the animal + speech bubble fill remaining space**: Use `flex-1` on the speech bubble + animal container so it occupies the remaining vertical space and centers the animal naturally below the form.
+
+6. **Move toggle link**: Add `pb-4` to keep the toggle at the bottom with minimal padding.
 
 ### Files changed
 - `src/pages/Auth.tsx`
