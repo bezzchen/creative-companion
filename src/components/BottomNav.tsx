@@ -4,8 +4,8 @@ import { Home, Users, User } from "lucide-react";
 
 const tabs = [
   { path: "/home", label: "Home", icon: Home },
-  { path: "/groups", label: "Groups", icon: Users, layoutId: "group-icon" },
-  { path: "/profile", label: "Profile", icon: User, layoutId: "profile-icon" },
+  { path: "/groups", label: "Groups", icon: Users },
+  { path: "/profile", label: "Profile", icon: User },
 ];
 
 const BottomNav = () => {
@@ -29,7 +29,6 @@ const BottomNav = () => {
           return (
             <motion.button
               key={tab.path}
-              layoutId={tab.layoutId}
               onClick={() => navigate(tab.path)}
               whileTap={{ scale: 0.9 }}
               className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-full transition-colors ${
