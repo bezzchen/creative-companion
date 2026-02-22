@@ -64,14 +64,20 @@ const Home = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
-        {/* Timer display - always rendered */}
-        <div className="mb-6">
-          <div className="bg-card/90 backdrop-blur-sm rounded-3xl px-10 py-4 shadow-lg border border-border/50">
-            <span className="text-5xl font-mono font-bold text-foreground tracking-widest">
-              {formatTime(timerSeconds)}
-            </span>
-          </div>
-        </div>
+        {/* Timer display - only visible when studying */}
+        {isStudying && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-card/90 backdrop-blur-sm rounded-3xl px-10 py-4 shadow-lg border border-border/50">
+              <span className="text-5xl font-mono font-bold text-foreground tracking-widest">
+                {formatTime(timerSeconds)}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Animal + Buttons Zone */}
         <div className="relative flex items-center justify-center">
