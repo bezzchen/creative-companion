@@ -36,7 +36,12 @@ const Auth = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
   if (user) return <Navigate to="/" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,16 +102,14 @@ const Auth = () => {
       </motion.form>
 
       {/* Speech Bubble + Animal */}
-      <div className="flex flex-col items-center mt-1">
+      <div className="flex flex-col items-center mt-2">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           className="relative mb-0"
         >
           <div className="bg-card/90 rounded-2xl px-6 py-3 shadow-lg border border-border text-center">
-            <p className="text-foreground font-semibold text-sm">
-              {isLogin ? "Welcome back!" : "Create your account"}
-            </p>
+            <p className="text-foreground font-semibold text-sm">{isLogin ? "Welcome back!" : "Create your account"}</p>
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 bg-card/90 border-r border-b border-border rotate-45" />
         </motion.div>
