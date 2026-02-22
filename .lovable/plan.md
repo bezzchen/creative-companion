@@ -1,46 +1,52 @@
 
-## Fix Floating Icons, Enlarge Animal, and Adjust Buttons
 
-### 1. Fix Group and Profile icon animations (Home.tsx, lines 84-110)
+## Fix Navigation Animations, Enlarge Buttons, and Animate Timer
 
-**Problem**: The icons use conditional rendering (`{!isStudying && ...}`) with `initial` entrance animations (opacity 0, scale 0.5, x offset). Every mount triggers a fly-in animation. They also lack `layoutId` props, so there's no shared layout transition to the BottomNav.
+### 1. Fix the "slow replay" animation when clicking Home in BottomNav
 
-**Fix**:
-- Add `layoutId="group-icon"` to the Group button and `layoutId="profile-icon"` to the Profile button (matching BottomNav's layoutIds)
-- Remove `initial` and the entrance-related props (`opacity`, `x`, `scale`) from `animate`
-- Keep only the sine-wave bobbing in `animate`: `{ y: [0, -8, 0] }` with `transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }`
-- The Profile icon's delay (0.5s) stays for a staggered bob effect
+**Root cause**: The `layoutId` props ("group-icon", "profile-icon") are shared between BottomNav and Home. When navigating to /home, BottomNav unmounts (returns null on /home) while Home mounts with the same layoutIds. Framer Motion tries to animate elements between these two positions across the route change, causing slow, glitchy transitions that replay every time.
 
-This means:
-- When idle, icons just bob gently (no fly-in on mount)
-- When `isStudying` becomes true, icons unmount from Home and the BottomNav icons (with matching `layoutId`) will receive the shared layout animation, making them appear to fly down to the footer
+**Fix**: Remove `layoutId` from both components entirely. The shared layout animation between nav bar and floating icons is unreliable across route changes with conditional rendering. Instead:
 
-### 2. Enlarge animal character (AnimalCharacter.tsx, line 47)
+- **Home.tsx (lines 82-104)**: Remove `layoutId` from both icon buttons. Keep the bobbing animation as-is.
+- **BottomNav.tsx (lines 5-9, 30-32)**: Remove `layoutId` from tabs config and the button. This stops the cross-route layout animation conflict.
 
-**Change**: Update the `xl` size from `"w-72 h-72"` to `"w-[36rem] h-[36rem]"` (doubles from 18rem to 36rem). Alternatively, add a new `"2xl"` size to avoid breaking other usages of `xl`.
+### 2. Enlarge buttons and increase spacing
 
-Better approach: Add a `"2xl"` entry to `sizeMap`:
-```
-2xl: "w-[36rem] h-[36rem]"
-```
-Update the `Props` type to include `"2xl"`, and change Home.tsx to use `size="2xl"`.
+Currently both buttons are `w-16 h-16` with `x` offset of 44px. With the 2x animal size increase, buttons should scale up too.
 
-### 3. Equalize button sizes and increase spacing (Home.tsx, lines 119-153)
+**Home.tsx changes**:
+- Play/Pause button (line 119): Change from `w-16 h-16` to `w-20 h-20`
+- Stop button (line 143): Change from `w-16 h-16` to `w-20 h-20`
+- Icon sizes inside buttons: Change from `w-7 h-7` to `w-9 h-9` (Play/Pause) and `w-6 h-6` to `w-7 h-7` (Stop square)
+- Increase x offset from 44 to 60 for both buttons
 
-- **Stop button**: Change from `w-14 h-14` to `w-16 h-16` (match the play/pause button)
-- **Spacing**: Increase the x-offset from `28` to `44` for both buttons:
-  - Play/Pause: `animate={{ x: isStudying ? -44 : 0 }}`
-  - Stop: `animate={{ x: isStudying ? 44 : 0 }}`
+### 3. Timer animation: rise from behind the animal
+
+The timer should start behind the animal (lower z-index), then float upward and above it when studying starts. When studying stops, it should sink back down and disappear behind the animal.
+
+**Home.tsx changes**:
+- Import `AnimatePresence` from framer-motion
+- Wrap the timer in `AnimatePresence` for exit animations
+- Give the timer a lower z-index than the animal (e.g., `z-0`) and position it so it starts overlapping behind the animal
+- Animate with:
+  - `initial`: `{ opacity: 0, y: 40 }` (starts below/behind animal)
+  - `animate`: `{ opacity: 1, y: 0 }` (floats up above)
+  - `exit`: `{ opacity: 0, y: 40 }` (sinks back down)
+  - `transition`: `{ duration: 0.5, ease: "easeOut" }`
+- Set the timer's container to `z-0` (behind the animal at `z-10`) and use `relative` positioning so the upward animation visually emerges from behind the character
 
 ### Files to edit
 
-1. **`src/components/AnimalCharacter.tsx`**
-   - Add `"2xl": "w-[36rem] h-[36rem]"` to sizeMap
-   - Update Props type to include `"2xl"`
+**`src/pages/Home.tsx`**:
+- Line 2: Add `AnimatePresence` to framer-motion import
+- Lines 68-76: Rework timer with AnimatePresence, exit animation, and z-index behind animal
+- Lines 82-90: Remove `layoutId="group-icon"` from Group button
+- Lines 94-104: Remove `layoutId="profile-icon"` from Profile button
+- Lines 113-130: Enlarge Play/Pause button to `w-20 h-20`, icons to `w-9 h-9`, x offset to -60
+- Lines 133-147: Enlarge Stop button to `w-20 h-20`, icon to `w-7 h-7`, x offset to 60
 
-2. **`src/pages/Home.tsx`**
-   - Group icon (line 86-93): Add `layoutId="group-icon"`, remove `initial`, simplify `animate` to just the bobbing
-   - Profile icon (line 98-109): Add `layoutId="profile-icon"`, remove `initial`, simplify `animate` to just the bobbing with delay
-   - Animal (line 114): Change `size="xl"` to `size="2xl"`
-   - Play/Pause button (line 120): Change x offset from -28 to -44
-   - Stop button (lines 141, 149): Change `w-14 h-14` to `w-16 h-16`, change x offset from 28 to 44
+**`src/components/BottomNav.tsx`**:
+- Lines 5-9: Remove `layoutId` property from tabs array entries
+- Line 32: Remove `layoutId={tab.layoutId}` from the motion.button
+
