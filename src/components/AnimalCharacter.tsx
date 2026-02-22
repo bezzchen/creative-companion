@@ -34,7 +34,7 @@ export const animalIconImages: Record<AnimalType, string> = {
 };
 
 interface Props {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   animal?: AnimalType;
   showHat?: boolean;
   active?: boolean;
@@ -45,6 +45,7 @@ const sizeMap = {
   md: "w-40 h-40",
   lg: "w-64 h-64",
   xl: "w-72 h-72",
+  "2xl": "w-[36rem] h-[36rem]",
 };
 
 const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false }: Props) => {

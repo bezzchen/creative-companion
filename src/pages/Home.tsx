@@ -84,8 +84,9 @@ const Home = () => {
           {/* Group icon - floating left */}
           {!isStudying && (
             <motion.button
-              initial={{ opacity: 0, x: 40, scale: 0.5 }}
-              animate={{ opacity: 1, x: 0, scale: 1, ...floatAnimation }}
+              layoutId="group-icon"
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }}
               onClick={() => navigate("/groups")}
               className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
             >
@@ -96,12 +97,9 @@ const Home = () => {
           {/* Profile icon - floating right */}
           {!isStudying && (
             <motion.button
-              initial={{ opacity: 0, x: -40, scale: 0.5 }}
-              animate={{
-                opacity: 1, x: 0, scale: 1,
-                y: [0, -8, 0],
-                transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 },
-              }}
+              layoutId="profile-icon"
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
               onClick={() => navigate("/profile")}
               className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
             >
@@ -111,13 +109,13 @@ const Home = () => {
 
           {/* Animal */}
           <div className="relative z-10">
-            <AnimalCharacter size="xl" active={isStudying} />
+            <AnimalCharacter size="2xl" active={isStudying} />
 
             {/* Play/Pause + Stop buttons - always rendered, animated via props */}
             <div className="absolute inset-0 flex items-center justify-center z-30">
               {/* Play/Pause button */}
               <motion.button
-                animate={{ x: isStudying ? -28 : 0 }}
+                animate={{ x: isStudying ? -44 : 0 }}
                 transition={springTransition}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -138,7 +136,7 @@ const Home = () => {
               {/* Stop button - slides out from behind */}
               <motion.button
                 animate={{
-                  x: isStudying ? 28 : 0,
+                  x: isStudying ? 44 : 0,
                   opacity: isStudying ? 1 : 0,
                   scale: isStudying ? 1 : 0.5,
                 }}
@@ -146,7 +144,7 @@ const Home = () => {
                 whileHover={isStudying ? { scale: 1.1 } : undefined}
                 whileTap={isStudying ? { scale: 0.9 } : undefined}
                 onClick={isStudying ? handleStop : undefined}
-                className="absolute w-14 h-14 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                className="absolute w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
                 style={{ pointerEvents: isStudying ? "auto" : "none" }}
               >
                 <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
