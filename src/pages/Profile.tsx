@@ -1,21 +1,37 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useApp, COSMETIC_STORE, AnimalType } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Clock, Flame, LogOut } from "lucide-react";
+import { Plus, Clock, Flame, LogOut, Pencil } from "lucide-react";
 import { animalIconImages } from "@/components/AnimalCharacter";
 
 const allAnimals: AnimalType[] = ["bear", "cat", "dog", "chicken"];
 
 const Profile = () => {
-  const { paws, username, hoursStudied, streak, status, equippedBorder, animal, setAnimal } = useApp();
+  const { paws, username, setUsername, hoursStudied, streak, status, equippedBorder, animal, setAnimal } = useApp();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(username);
 
   const borderItem = equippedBorder ? COSMETIC_STORE.find((c) => c.id === equippedBorder) : null;
   const currentIcon = animal ? animalIconImages[animal] : null;
 
   const statusColor = status === "studying" ? "bg-blue-500 animate-pulse" : status === "idle" ? "bg-green-500" : "bg-gray-400";
+
+  const startEditing = () => {
+    setEditValue(username);
+    setIsEditing(true);
+  };
+
+  const save = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed.length <= 50) setUsername(trimmed);
+    else setEditValue(username);
+    setIsEditing(false);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -47,14 +63,30 @@ const Profile = () => {
           )}
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mt-4 text-2xl font-extrabold text-foreground"
-        >
-          {username}
-        </motion.h1>
+        {isEditing ? (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mt-4">
+            <input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={save}
+              onKeyDown={(e) => { if (e.key === "Enter") save(); }}
+              autoFocus
+              maxLength={50}
+              className="text-2xl font-extrabold text-foreground text-center bg-transparent border-b-2 border-primary outline-none w-48"
+            />
+          </motion.div>
+        ) : (
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mt-4 text-2xl font-extrabold text-foreground flex items-center gap-2 cursor-pointer"
+            onClick={startEditing}
+          >
+            {username}
+            <Pencil className="w-4 h-4 text-muted-foreground" />
+          </motion.h1>
+        )}
 
         {/* Animal Selector */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="flex gap-3 mt-3">
