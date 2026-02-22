@@ -74,7 +74,7 @@ const Home = () => {
             {!isStudying && (
               <motion.div
                 animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.25 }}
                 className="mb-[-1rem] z-20 relative"
               >
                 <motion.div
