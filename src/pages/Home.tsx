@@ -80,34 +80,36 @@ const Home = () => {
           <div className="relative flex items-center justify-center">
             {/* Group icon - floating left */}
             {!isStudying && (
-              <motion.button
-                layoutId="groups-icon"
-                onClick={() => navigate("/groups")}
-                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -left-14 top-4 z-20"
               >
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                <motion.button
+                  layoutId="groups-icon"
+                  onClick={() => navigate("/groups")}
+                  className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50"
                 >
                   <Users className="w-5 h-5 text-primary" />
-                </motion.div>
-              </motion.button>
+                </motion.button>
+              </motion.div>
             )}
 
             {/* Profile icon - floating right */}
             {!isStudying && (
-              <motion.button
-                layoutId="profile-icon"
-                onClick={() => navigate("/profile")}
-                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute -right-14 top-4 z-20"
               >
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                <motion.button
+                  layoutId="profile-icon"
+                  onClick={() => navigate("/profile")}
+                  className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50"
                 >
                   <User className="w-5 h-5 text-primary" />
-                </motion.div>
-              </motion.button>
+                </motion.button>
+              </motion.div>
             )}
 
             {/* Animal */}
