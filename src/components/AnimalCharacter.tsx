@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useApp, AnimalType, COSMETIC_STORE } from "@/context/AppContext";
+import { useApp, AnimalType } from "@/context/AppContext";
 import bearImg from "@/assets/bear.png";
 import catImg from "@/assets/cat.png";
 import dogImg from "@/assets/dog.png";
@@ -12,11 +12,25 @@ import bearIconImg from "@/assets/bearicon.png";
 import catIconImg from "@/assets/caticon.png";
 import dogIconImg from "@/assets/dogicon.png";
 import chickenIconImg from "@/assets/chickenicon.png";
-
 import bearLong1 from "@/assets/bearlong1.png";
 import catLong1 from "@/assets/catlong1.png";
 import dogLong1 from "@/assets/doglong1.png";
 import duckLong1 from "@/assets/ducklong1.png";
+import activetableImg from "@/assets/activetable.png";
+
+// Composite images: animal + cosmetic
+import bearhatImg from "@/assets/bearhat.png";
+import bearbowImg from "@/assets/bearbow.png";
+import bearglassesImg from "@/assets/bearglasses.png";
+import cathatImg from "@/assets/cathat.png";
+import catbowImg from "@/assets/catbow.png";
+import catglassesImg from "@/assets/catglasses.png";
+import doghatImg from "@/assets/doghat.png";
+import dogbowImg from "@/assets/dogbow.png";
+import dogglassesImg from "@/assets/dogglasses.png";
+import duckhatImg from "@/assets/duckhat.png";
+import duckbowImg from "@/assets/duckbow.png";
+import duckglassesImg from "@/assets/duckglasses.png";
 
 const animalImages: Record<AnimalType, string> = {
   bear: bearImg,
@@ -46,11 +60,18 @@ const animalIdleFrames: Record<AnimalType, string[]> = {
   chicken: [duckImg, duckLong1],
 };
 
+const cosmeticAnimalMap: Record<string, Record<AnimalType, string>> = {
+  "hat-hat": { bear: bearhatImg, cat: cathatImg, dog: doghatImg, chicken: duckhatImg },
+  "hat-bow": { bear: bearbowImg, cat: catbowImg, dog: dogbowImg, chicken: duckbowImg },
+  "hat-glasses": { bear: bearglassesImg, cat: catglassesImg, dog: dogglassesImg, chicken: duckglassesImg },
+};
+
 interface Props {
   size?: "sm" | "md" | "lg" | "xl" | "2xl";
   animal?: AnimalType;
   showHat?: boolean;
   active?: boolean;
+  paused?: boolean;
 }
 
 const sizeMap = {
@@ -61,7 +82,7 @@ const sizeMap = {
   "2xl": "w-[36rem] h-[36rem]",
 };
 
-const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false }: Props) => {
+const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false, paused = false }: Props) => {
   const { animal: ctxAnimal, equippedHat } = useApp();
   const animal = animalProp || ctxAnimal;
   const [frameIndex, setFrameIndex] = useState(0);
@@ -69,7 +90,7 @@ const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, acti
   const idleFrames = animal ? animalIdleFrames[animal] : undefined;
 
   useEffect(() => {
-    if (active || !idleFrames) {
+    if (active || paused || !idleFrames) {
       setFrameIndex(0);
       return;
     }
@@ -77,19 +98,23 @@ const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, acti
       setFrameIndex((prev) => (prev + 1) % 2);
     }, 750);
     return () => clearInterval(interval);
-  }, [active, idleFrames]);
+  }, [active, paused, idleFrames]);
 
   if (!animal) return null;
 
-  const img = active ? animalActiveImages[animal] : idleFrames ? idleFrames[frameIndex] : animalImages[animal];
-
-  const hatItem = equippedHat ? COSMETIC_STORE.find((c) => c.id === equippedHat) : null;
+  let img: string;
+  if (paused) {
+    img = activetableImg;
+  } else if (active) {
+    img = animalActiveImages[animal];
+  } else if (equippedHat && cosmeticAnimalMap[equippedHat]?.[animal]) {
+    img = cosmeticAnimalMap[equippedHat][animal];
+  } else {
+    img = idleFrames ? idleFrames[frameIndex] : animalImages[animal];
+  }
 
   return (
     <div className={`relative ${sizeMap[size]} flex-shrink-0`}>
-      {showHat && hatItem && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-3xl z-10 drop-shadow-md">{hatItem.preview}</div>
-      )}
       <img src={img} alt={animal} className="w-full h-full object-contain drop-shadow-lg" draggable={false} />
     </div>
   );
