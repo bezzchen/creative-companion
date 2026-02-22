@@ -102,7 +102,7 @@ const Auth = () => {
       </motion.form>
 
       {/* Speech Bubble + Animal */}
-      <div className="flex flex-col items-center mt-2">
+      <div className="flex flex-col items-center mt-3">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -117,7 +117,7 @@ const Auth = () => {
         <img
           src={frame === 0 ? animal.idle : animal.long}
           alt="Animal character"
-          className="w-80 h-72 object-contain"
+          className="w-80 h-80 object-contain"
         />
       </div>
 
