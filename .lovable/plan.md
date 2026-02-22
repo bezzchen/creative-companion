@@ -1,47 +1,19 @@
 
 
-## Add paw.png as Home Button with Layout Animation
+## Move Paw Icon to Top-Left of Home Page
 
-### Overview
-Replace the Lucide `Home` icon with `paw.png` in both the Home page (as a floating button, top-left) and the BottomNav footer. The paw icon will use `layoutId` to animate between the two positions (same as Groups and Profile icons), but without the bobbing/sine-wave animation on the Home page.
+### Problem
+The paw icon is currently placed inside the animal character container with `right-[150px]`, which puts it on the right side and tied to the animal's position. It should be at the very top-left corner of the page.
+
+### Solution
+Move the paw icon out of the animal container and place it as a fixed/absolute element at the top-left of the main content area, using `left-6 top-6` positioning (similar to a page-level floating button).
 
 ### Changes
 
-#### 1. `src/pages/Home.tsx`
-- Import `paw.png` from assets
-- Add a new floating button in the top-left area (when `!isStudying`), using `layoutId="home-icon"` for the shared layout transition
-- Render `paw.png` as an `<img>` inside the button (no bobbing `y` animation -- just static positioning so it only animates when transitioning to/from the footer)
-
-#### 2. `src/components/BottomNav.tsx`
-- Import `paw.png` from assets
-- Give the Home tab a `layoutId` of `"home-icon"` (currently `undefined`)
-- Replace the Lucide `Home` icon with the `paw.png` image for the Home tab
-
-### Technical Details
-
-**Home.tsx** -- new floating paw button (top-left, no bobbing):
-```text
-import pawIcon from "@/assets/paw.png";
-
-// Rendered when !isStudying, positioned top-left of the animal area
-<motion.button
-  layoutId="home-icon"
-  onClick={() => navigate("/home")}
-  className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50"
->
-  <img src={pawIcon} alt="Home" className="w-6 h-6 object-contain" />
-</motion.button>
-```
-
-**BottomNav.tsx** -- replace Home icon with paw.png:
-```text
-import pawIcon from "@/assets/paw.png";
-
-// Home tab gets layoutId: "home-icon"
-// Instead of <Icon /> for the Home tab, render <img src={pawIcon} />
-```
+**`src/pages/Home.tsx`**
+- Remove the paw icon block from inside the `<div className="relative flex items-center justify-center">` container (lines 145-158)
+- Add it instead right after the main content div opens (after line 96), as an absolutely positioned element with `left-6 top-6 z-20` so it sits at the top-left of the page
 
 ### Files changed
 - `src/pages/Home.tsx`
-- `src/components/BottomNav.tsx`
 
