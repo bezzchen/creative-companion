@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Play, Pause, Square, Users, User, Plus } from "lucide-react";
@@ -20,6 +20,9 @@ const Home = () => {
   const { paws, timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer } = useApp();
   const navigate = useNavigate();
   const [isStudying, setIsStudying] = useState(false);
+
+  const quotes = ["Let's study!", "You've got this!", "Time to focus!", "One step at a time!", "You're doing great!", "Keep it up! 📚", "You can do it! ✨"];
+  const randomQuote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
   const handlePlay = useCallback(() => {
     setIsStudying(true);
@@ -58,6 +61,31 @@ const Home = () => {
         {/* Animal + Buttons Zone */}
         <div className="relative flex flex-col items-center justify-center">
           {/* Timer - behind animal, floats up */}
+          {/* Speech bubble - visible when NOT studying */}
+          <AnimatePresence>
+            {!isStudying && (
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="mb-[-1rem] z-20 relative"
+              >
+                <motion.div
+                  key="speech-bubble"
+                  initial={{ opacity: 0, y: 200 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 200 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <div className="bg-card/90 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-lg border border-border/50 relative">
+                    <p className="text-sm font-semibold text-foreground text-center">{randomQuote}</p>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card/90 border-r border-b border-border/50 rotate-45" />
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Timer - visible when studying */}
           <AnimatePresence>
             {isStudying && (
               <motion.div
@@ -83,7 +111,7 @@ const Home = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-20 top-4 z-20"
+                className="absolute left-8 top-12 z-20"
               >
                 <motion.button
                   layoutId="groups-icon"
@@ -100,7 +128,7 @@ const Home = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute right-20 top-4 z-20"
+                className="absolute right-8 top-12 z-20"
               >
                 <motion.button
                   layoutId="profile-icon"
