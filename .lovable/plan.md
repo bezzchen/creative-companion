@@ -1,14 +1,43 @@
 
 
-## Reduce Distance Between Group and Profile Icons
+## Idle Animation for Animals (Frame Cycling)
 
-### Change
+### Overview
+Add a sprite-sheet-style idle animation to the animal character on the Home screen. The animation cycles through PNG frames in this sequence (repeating):
 
-In `src/pages/Home.tsx`, the Groups icon is positioned with `className="absolute -left-2 top-4 z-20"` and the Profile icon with `className="absolute -right-2 top-4 z-20"`. These `-left-2` and `-right-2` values control how far apart the icons are from the animal character in the center.
+```text
+original -> squish1 -> squish2 -> squish1 -> original -> long1 -> long2 -> long1
+```
 
-To bring them closer together, change both values inward:
-- Groups icon (line 86): `-left-2` to `left-4`
-- Profile icon (line 103): `-right-2` to `right-4`
+Only dog frames are available now; the system will be built to support all animals once their frames are uploaded.
 
-This shifts each icon roughly 24px inward toward the animal, reducing the total gap between them.
+### Steps
+
+**1. Copy uploaded images into `src/assets/`**
+- `dogsquish1.png`
+- `dogsquish2.png`
+- `doglong1.png`
+- `doglong2.png`
+
+**2. Update `AnimalCharacter.tsx`**
+- Import the new dog frame images.
+- Define an `animalIdleFrames` record mapping each `AnimalType` to an ordered array of 8 image sources following the cycle: `[original, squish1, squish2, squish1, original, long1, long2, long1]`. For animals without frames yet (bear, cat, chicken), the array will just repeat the original image 8 times (no visible animation until frames are uploaded).
+- Add a `useEffect` + `useState` to cycle through the frame array on a timer (roughly 200-250ms per frame) when `active` is `false` (idle state). When `active` is `true` (studying), use the existing active image instead.
+- Render the current frame as the `img` src.
+
+### Technical Details
+
+The component will use:
+- `useState` for the current frame index (0-7)
+- `useEffect` with `setInterval` to advance the frame index, wrapping around with modulo
+- The interval only runs when `active === false`
+- Frame duration: ~250ms per frame, giving a full cycle of ~2 seconds
+
+```text
+AnimalCharacter
+  |-- idle (active=false): cycles through 8-frame array on interval
+  |-- studying (active=true): shows the single active image (no cycling)
+```
+
+No changes needed to `Home.tsx` -- the animation is self-contained in `AnimalCharacter`.
 
