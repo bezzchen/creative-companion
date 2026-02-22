@@ -1,54 +1,60 @@
 
 
-## Home Screen UI Tweaks + Speech Bubble
+## Automatic Status System
 
-### Changes (all in `src/pages/Home.tsx`)
+### Overview
+Replace the manual 4-status toggle with an automatic 3-status system: **studying**, **idle**, and **offline**. The status will be determined entirely by app state -- no user interaction needed.
 
-**1. Move icons closer together and lower**
+### Status Logic
+- **studying** -- timer is running (`timerRunning === true`)
+- **idle** -- app is open/visible but timer is not running
+- **offline** -- browser tab is hidden or user navigates away
 
-- Change the Groups icon position from `left-20 top-4` to `left-8 top-12`
-- Change the Profile icon position from `right-20 top-4` to `right-8 top-12`
+### Changes
 
-This brings them closer to the animal horizontally and pushes them down vertically.
+**1. `src/context/AppContext.tsx`**
+- Update `UserStatus` type from `"studying" | "in-event" | "away" | "offline"` to `"studying" | "idle" | "offline"`
+- Remove `setStatus` from the context interface and provider value (no longer user-controlled)
+- Add a `useEffect` that automatically syncs status to the database:
+  - When `timerRunning` is true, set status to `"studying"`
+  - When `timerRunning` is false and document is visible, set status to `"idle"`
+- Add a `useEffect` listening to `document.visibilitychange`:
+  - When the tab becomes hidden, set status to `"offline"`
+  - When it becomes visible again, set status based on `timerRunning` (studying or idle)
+- Remove `setStatus` from the `ALLOWED_FIELDS` in `useProfile.ts` if needed, or keep it since the context still writes status via `updateProfile`
 
-**2. Add a speech bubble above the animal**
+**2. `src/pages/Profile.tsx`**
+- Remove the `setStatus` destructure from `useApp()`
+- Remove the `statuses` array (line 16)
+- Replace the interactive status toggle buttons (lines 73-86) with a single read-only status badge showing the current status with a colored dot indicator:
+  - Green dot for "idle"
+  - Blue/pulsing dot for "studying"  
+  - Gray dot for "offline"
+- Remove the `capitalize` button styling and replace with a simple badge below the username
 
-- Create an array of encouraging quotes (e.g., "Let's study!", "You've got this!", "Time to focus!", "One step at a time!", "You're doing great!")
-- Pick a random quote on mount using `useMemo`
-- Render the speech bubble above the timer/animal area using `AnimatePresence`, visible only when `!isStudying` (inverse of the timer)
-- The bubble uses the same animation pattern as the timer but reversed: it shows when the timer hides and hides when the timer shows
-- Entry: `initial={{ opacity: 0, y: 200 }}`, `animate={{ opacity: 1, y: 0 }}`, `exit={{ opacity: 0, y: 200 }}`
-- Wrap in a bobbing container: `animate={{ y: [0, -8, 0] }}` with `duration: 2.5, repeat: Infinity` (matching the icon bob)
-- Style: rounded card with a small triangle/tail pointing down, placed above the icons in z-order
+**3. `src/pages/Groups.tsx`**
+- No logic changes needed -- it already checks `status === "studying"` to pick the active vs idle image, which will continue to work with the new status values
 
 ### Technical Details
 
+Status sync effect in AppContext:
 ```text
-Speech bubble structure:
+useEffect:
+  - Listen to document "visibilitychange"
+  - On hidden: updateProfile({ status: "offline" })
+  - On visible: updateProfile({ status: timerRunning ? "studying" : "idle" })
+  - Cleanup: remove event listener
 
-<AnimatePresence>
-  {!isStudying && (
-    <motion.div  // bob wrapper
-      animate={{ y: [0, -8, 0] }}
-      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-    >
-      <motion.div  // enter/exit animation
-        initial={{ opacity: 0, y: 200 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 200 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="bg-card/90 ... rounded-2xl px-5 py-3 ...">
-          <p>"Let's study!"</p>
-          <!-- CSS triangle tail below -->
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-Positioned above the animal with mb-[-1rem] and z-0,
-mirroring the timer's placement but shown in the opposite state.
+useEffect (depends on timerRunning):
+  - If timerRunning: updateProfile({ status: "studying" })
+  - Else if document is visible: updateProfile({ status: "idle" })
 ```
 
-No other files need changes.
+Profile status display (read-only badge):
+```text
+<div className="flex items-center gap-2 mt-2">
+  <span className="w-2 h-2 rounded-full {color based on status}" />
+  <span className="text-sm text-muted-foreground capitalize">{status}</span>
+</div>
+```
+
