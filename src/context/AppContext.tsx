@@ -67,20 +67,26 @@ export const useApp = () => {
   return ctx;
 };
 
+import hatPreview from "@/assets/hat.png";
+import bowPreview from "@/assets/bow.png";
+import glassesPreview from "@/assets/glasses.png";
+import icebergPreview from "@/assets/Iceberg.png";
+import fieldPreview from "@/assets/Field.png";
+import housePreview from "@/assets/House.png";
+import butterflyPreview from "@/assets/butterfly.png";
+import musicPreview from "@/assets/music.png";
+import firePreview from "@/assets/fire.png";
+
 export const COSMETIC_STORE: CosmeticItem[] = [
-  { id: "hat-crown", name: "Royal Crown", category: "hat", price: 50, preview: "👑" },
-  { id: "hat-tophat", name: "Top Hat", category: "hat", price: 30, preview: "🎩" },
-  { id: "hat-cap", name: "Baseball Cap", category: "hat", price: 20, preview: "🧢" },
-  { id: "hat-party", name: "Party Hat", category: "hat", price: 15, preview: "🥳" },
-  { id: "hat-wizard", name: "Wizard Hat", category: "hat", price: 40, preview: "🧙" },
-  { id: "border-gold", name: "Gold Frame", category: "border", price: 60, preview: "🟡" },
-  { id: "border-rainbow", name: "Rainbow Frame", category: "border", price: 45, preview: "🌈" },
-  { id: "border-fire", name: "Fire Frame", category: "border", price: 55, preview: "🔥" },
-  { id: "border-ice", name: "Ice Frame", category: "border", price: 40, preview: "❄️" },
-  { id: "bg-sunset", name: "Sunset", category: "background", price: 80, preview: "🌅" },
-  { id: "bg-forest", name: "Forest", category: "background", price: 70, preview: "🌲" },
-  { id: "bg-space", name: "Space", category: "background", price: 100, preview: "🚀" },
-  { id: "bg-ocean", name: "Ocean", category: "background", price: 75, preview: "🌊" },
+  { id: "hat-hat", name: "Hat", category: "hat", price: 30, preview: hatPreview },
+  { id: "hat-bow", name: "Bow", category: "hat", price: 25, preview: bowPreview },
+  { id: "hat-glasses", name: "Glasses", category: "hat", price: 20, preview: glassesPreview },
+  { id: "bg-iceberg", name: "Iceberg", category: "background", price: 80, preview: icebergPreview },
+  { id: "bg-field", name: "Field", category: "background", price: 70, preview: fieldPreview },
+  { id: "bg-house", name: "House", category: "background", price: 75, preview: housePreview },
+  { id: "border-butterfly", name: "Butterfly", category: "border", price: 50, preview: butterflyPreview },
+  { id: "border-music", name: "Music", category: "border", price: 45, preview: musicPreview },
+  { id: "border-fire", name: "Fire", category: "border", price: 55, preview: firePreview },
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

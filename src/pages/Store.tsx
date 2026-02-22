@@ -8,7 +8,7 @@ type Category = "hat" | "border" | "background";
 
 const categoryLabels: Record<Category, { label: string; emoji: string }> = {
   hat: { label: "Hats", emoji: "🎩" },
-  border: { label: "Borders", emoji: "🖼️" },
+  border: { label: "Icons", emoji: "✨" },
   background: { label: "Backgrounds", emoji: "🌄" },
 };
 
@@ -80,7 +80,7 @@ const Store = () => {
                 transition={{ delay: i * 0.05 }}
                 className="bg-card rounded-2xl p-4 border border-border/50 shadow-sm flex flex-col items-center"
               >
-                <span className="text-4xl mb-3">{item.preview}</span>
+                <img src={item.preview} alt={item.name} className="w-16 h-16 object-contain mb-3" />
                 <p className="font-bold text-foreground text-sm">{item.name}</p>
                 <button
                   onClick={() => handleAction(item)}

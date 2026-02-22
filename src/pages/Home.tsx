@@ -150,7 +150,7 @@ const Home = () => {
 
             {/* Animal */}
             <div className="relative z-10">
-              <AnimalCharacter size="2xl" active={isStudying} />
+              <AnimalCharacter size="2xl" active={isStudying && timerRunning} paused={isStudying && !timerRunning} />
 
               {/* Play/Pause + Stop buttons */}
               <div className="absolute inset-0 flex items-center justify-center z-30">
