@@ -1,28 +1,54 @@
 
 
-## Clean Up Old Animation Code
+## Home Screen UI Tweaks + Speech Bubble
 
-### Overview
-The previous simplification deleted the squish/long2 image files but didn't fully update `AnimalCharacter.tsx`. The file still imports deleted images and uses the old 8-frame cycle. This fix removes all references to deleted files and updates the animation to the approved 2-frame cycle.
+### Changes (all in `src/pages/Home.tsx`)
 
-### Changes to `AnimalCharacter.tsx`
+**1. Move icons closer together and lower**
 
-**Remove these imports (lines 17-28):**
-- `bearsquish1.png`, `bearsquish2.png`, `bearlong2.png`
-- `catsquish1.png`, `catsquish2.png`, `catlong2.png`
-- `dogsquish1.png`, `dogsquish2.png`, `doglong2.png`
+- Change the Groups icon position from `left-20 top-4` to `left-8 top-12`
+- Change the Profile icon position from `right-20 top-4` to `right-8 top-12`
 
-**Add missing import:**
-- `ducklong1.png` (for chicken/duck idle animation)
+This brings them closer to the animal horizontally and pushes them down vertically.
 
-**Update `animalIdleFrames` (lines 51-56):**
-- Change from 8-frame arrays to 2-frame arrays: `[original, long1]`
-- Include all four animals (add chicken/duck)
-- Change type from `Partial<Record<...>>` to `Record<...>`
+**2. Add a speech bubble above the animal**
 
-**Update interval (line 86):**
-- Change `% 8` to `% 2`
+- Create an array of encouraging quotes (e.g., "Let's study!", "You've got this!", "Time to focus!", "One step at a time!", "You're doing great!")
+- Pick a random quote on mount using `useMemo`
+- Render the speech bubble above the timer/animal area using `AnimatePresence`, visible only when `!isStudying` (inverse of the timer)
+- The bubble uses the same animation pattern as the timer but reversed: it shows when the timer hides and hides when the timer shows
+- Entry: `initial={{ opacity: 0, y: 200 }}`, `animate={{ opacity: 1, y: 0 }}`, `exit={{ opacity: 0, y: 200 }}`
+- Wrap in a bobbing container: `animate={{ y: [0, -8, 0] }}` with `duration: 2.5, repeat: Infinity` (matching the icon bob)
+- Style: rounded card with a small triangle/tail pointing down, placed above the icons in z-order
 
-### No other files need changes
-All unused image files were already deleted in the previous step.
+### Technical Details
 
+```text
+Speech bubble structure:
+
+<AnimatePresence>
+  {!isStudying && (
+    <motion.div  // bob wrapper
+      animate={{ y: [0, -8, 0] }}
+      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <motion.div  // enter/exit animation
+        initial={{ opacity: 0, y: 200 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 200 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="bg-card/90 ... rounded-2xl px-5 py-3 ...">
+          <p>"Let's study!"</p>
+          <!-- CSS triangle tail below -->
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+Positioned above the animal with mb-[-1rem] and z-0,
+mirroring the timer's placement but shown in the opposite state.
+```
+
+No other files need changes.
