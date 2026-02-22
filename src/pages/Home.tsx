@@ -83,7 +83,7 @@ const Home = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -left-14 top-4 z-20"
+                className="absolute -left-10 top-4 z-20"
               >
                 <motion.button
                   layoutId="groups-icon"
@@ -100,7 +100,7 @@ const Home = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -right-14 top-4 z-20"
+                className="absolute -right-10 top-4 z-20"
               >
                 <motion.button
                   layoutId="profile-icon"
