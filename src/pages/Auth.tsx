@@ -97,11 +97,11 @@ const Auth = () => {
       </motion.form>
 
       {/* Speech Bubble + Animal */}
-      <div className="flex flex-col items-center justify-center flex-1">
+      <div className="flex flex-col items-center mt-4">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="relative mb-2"
+          className="relative mb-0"
         >
           <div className="bg-card/90 rounded-2xl px-8 py-4 shadow-lg border border-border text-center">
             <p className="text-foreground font-semibold text-sm">
@@ -114,14 +114,14 @@ const Auth = () => {
         <img
           src={frame === 0 ? animal.idle : animal.long}
           alt="Animal character"
-          className="w-96 h-96 object-contain"
+          className="w-80 h-80 object-contain"
         />
       </div>
 
       {/* Toggle */}
       <button
         onClick={() => setIsLogin(!isLogin)}
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors pb-4"
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
       >
         {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
       </button>
