@@ -5,7 +5,7 @@ import { useStudySessions } from "@/hooks/useStudySessions";
 import { useAuth } from "@/context/AuthContext";
 
 export type AnimalType = "dog" | "cat" | "bear" | "chicken";
-export type UserStatus = "studying" | "in-event" | "away" | "offline";
+export type UserStatus = "studying" | "idle" | "offline";
 
 export interface CosmeticItem {
   id: string;
@@ -43,7 +43,6 @@ interface AppState {
   pauseTimer: () => void;
   stopTimer: () => void;
   status: UserStatus;
-  setStatus: (s: UserStatus) => void;
   username: string;
   setUsername: (n: string) => void;
   hoursStudied: number;
@@ -116,9 +115,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateProfile.mutate({ username: trimmed });
   }, [updateProfile]);
 
-  const setStatus = useCallback((s: UserStatus) => {
-    updateProfile.mutate({ status: s });
-  }, [updateProfile]);
+  // Auto-sync status based on timer state
+  useEffect(() => {
+    if (!user) return;
+    if (timerRunning) {
+      updateProfile.mutate({ status: "studying" });
+    } else if (document.visibilityState === "visible") {
+      updateProfile.mutate({ status: "idle" });
+    }
+  }, [timerRunning, user]);
+
+  // Auto-sync status based on tab visibility
+  useEffect(() => {
+    if (!user) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        updateProfile.mutate({ status: "offline" });
+      } else {
+        updateProfile.mutate({ status: timerRunning ? "studying" : "idle" });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    // Set idle on mount
+    if (document.visibilityState === "visible" && !timerRunning) {
+      updateProfile.mutate({ status: "idle" });
+    }
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [user, timerRunning]);
 
   // addPaws and spendPaws removed — all currency operations go through server RPCs
 
@@ -196,7 +219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         animal, setAnimal, paws,
         timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer,
-        status, setStatus, username, setUsername,
+        status, username, setUsername,
         hoursStudied, streak, ownedCosmetics,
         equippedHat, equippedBorder, equippedBackground,
         equipCosmetic, unequipCosmetic, buyCosmetic,

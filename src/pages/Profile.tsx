@@ -8,13 +8,14 @@ import { animalIconImages } from "@/components/AnimalCharacter";
 const allAnimals: AnimalType[] = ["bear", "cat", "dog", "chicken"];
 
 const Profile = () => {
-  const { paws, username, hoursStudied, streak, status, setStatus, equippedBorder, animal, setAnimal } = useApp();
+  const { paws, username, hoursStudied, streak, status, equippedBorder, animal, setAnimal } = useApp();
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
   const borderItem = equippedBorder ? COSMETIC_STORE.find((c) => c.id === equippedBorder) : null;
-  const statuses = ["studying", "in-event", "away", "offline"] as const;
   const currentIcon = animal ? animalIconImages[animal] : null;
+
+  const statusColor = status === "studying" ? "bg-blue-500 animate-pulse" : status === "idle" ? "bg-green-500" : "bg-gray-400";
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -70,19 +71,10 @@ const Profile = () => {
           ))}
         </motion.div>
 
-        {/* Status toggle */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex gap-2 mt-4 flex-wrap justify-center">
-          {statuses.map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatus(s)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize transition-colors ${
-                status === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {s.replace("-", " ")}
-            </button>
-          ))}
+        {/* Status badge (read-only) */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-2 mt-2">
+          <span className={`w-2 h-2 rounded-full ${statusColor}`} />
+          <span className="text-sm text-muted-foreground capitalize">{status}</span>
         </motion.div>
 
         {/* Stats */}
