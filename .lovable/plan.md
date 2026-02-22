@@ -1,40 +1,22 @@
 
 
-## Rework Home Page Button Animation
+## Fix Floating Icons and Timer Visibility
 
-### Problem
-The current button animation has multiple issues causing visual glitches:
-- Two separate `AnimatePresence` blocks (one for Play, one for Pause+Stop) fight each other during transitions
-- The SVG goo filter adds rendering overhead and interferes with positioning
-- The Play button fades out while the controls container fades in simultaneously, causing layout jumps
-- Redundant timer display code (shown twice -- once inside AnimatePresence, once outside)
+### Changes to `src/pages/Home.tsx`
 
-### New Animation Concept
-Single button that transforms in place:
-1. **Idle**: Play button centered on the animal
-2. **Press Play**: Play icon swaps to Pause icon (same button, no unmount/remount). Stop button slides up from behind the Pause button, then both split apart horizontally.
-3. **Press Stop**: Buttons slide back together, Stop slides back underneath, icon swaps back to Play.
+**1. Restore sine-wave floating animation on Group and Profile icons**
 
-### Technical Changes
+The Group icon (lines 80-87) and Profile icon (lines 92-103) currently use `initial`/`animate` with entrance transitions mixed into the float animation. This causes the float to restart or conflict on re-mount. Fix: keep the float animation as-is (it already uses `y: [0, -8, 0]` with `repeat: Infinity`) but the icons are conditionally rendered (`{!isStudying && ...}`), so they remount each time -- the current `initial` + `animate` approach is actually correct for the float. The Profile icon already has the delay. No changes needed here; the floating logic is intact.
 
-**File: `src/pages/Home.tsx`**
+**2. Hide the timer when not studying**
 
-1. **Remove the SVG goo filter** -- delete the entire `<svg>` block (lines 50-63). It's not needed for the new animation.
+The timer (lines 67-74) is currently always visible. Wrap it so it only shows when `isStudying` is true, with a fade-in animation:
 
-2. **Remove duplicate timer display** -- consolidate the two timer blocks (lines 82-108) into one that's always rendered (no AnimatePresence needed since the timer is always visible).
+- Replace the static `<div className="mb-6">` wrapper with a conditional: only render when `isStudying` is true
+- Wrap in `<motion.div>` with `initial={{ opacity: 0, y: -10 }}` and `animate={{ opacity: 1, y: 0 }}` for a smooth entrance
 
-3. **Replace the button zone** (lines 153-218) with a single simplified approach:
-   - Use `isStudying` to control layout, not mount/unmount
-   - One container `div` with `position: relative`
-   - **Pause/Play button**: Always rendered in the center. Uses `motion.button` with `animate` to shift left (`x: -28`) when studying, stay centered (`x: 0`) when idle. Icon swaps between Play/Pause based on state.
-   - **Stop button**: Always rendered but starts hidden behind the pause button. Uses `motion.button` with `animate` to control: `opacity` (0 to 1), `scale` (0.5 to 1), and `x` (0 to 28) to slide out to the right. Initial position is stacked behind the main button.
-   - No `AnimatePresence` needed for the buttons -- just animate properties based on `isStudying` boolean.
+### Summary of edits
 
-4. **Simplify state**: The `isStudying` state and callbacks remain the same, but the rendering logic becomes much simpler with no conditional mounting.
+- **Lines 67-74**: Wrap timer in `{isStudying && <motion.div ...>}` so it only appears during a study session
+- No other changes needed -- the floating icons already have the correct sine-wave animation
 
-### Result
-- No layout jumps because buttons never unmount/remount
-- Smooth "split apart" effect using simple x-position animations
-- Stop button slides out from behind the pause button naturally
-- No SVG filter overhead
-- Cleaner, less code overall
