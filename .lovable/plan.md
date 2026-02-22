@@ -1,42 +1,53 @@
-## Idle Animation for All Animals
+
+
+## Simplify Idle Animation to 2-Frame Cycle
 
 ### Overview
-
-Add a frame-cycling idle animation to the animal character on the Home screen. The animation sequence is: **original, squish1, squish2, squish1, original, long1, long2, long1** -- repeating every ~2 seconds (250ms per frame, 8 frames).
-
-Frames are provided for the **bear** and the **cat**. Ask about the dog and the duck
+Simplify the idle animation from an 8-frame cycle to a simple 2-frame toggle between the original image and long1, for all four animals (bear, cat, dog, and chicken/duck).
 
 ### Steps
 
-**1. Copy uploaded images into `src/assets/**`
+**1. Copy uploaded images into `src/assets/`**
 
-Overwrite existing originals and add new animation frames:
+| File | Target |
+|------|--------|
+| bear-5.png | `src/assets/bear.png` (overwrite) |
+| bearlong1-3.png | `src/assets/bearlong1.png` (overwrite) |
+| cat-4.png | `src/assets/cat.png` (overwrite) |
+| catlong1-5.png | `src/assets/catlong1.png` (overwrite) |
+| dog-4.png | `src/assets/dog.png` (overwrite) |
+| doglong1-3.png | `src/assets/doglong1.png` (overwrite) |
+| duck-3.png | `src/assets/duck.png` (overwrite) |
+| ducklong1.png | `src/assets/ducklong1.png` (new) |
 
+**2. Delete unused frame images**
 
-| Animal | Files to copy                                                                                  |
-| ------ | ---------------------------------------------------------------------------------------------- |
-| &nbsp; | &nbsp;                                                                                         |
-| Bear   | `bear.png` (overwrite), `bearsquish1.png`, `bearsquish2.png`, `bearlong1.png`, `bearlong2.png` |
-| Cat    | `cat.png` (overwrite), `catsquish1.png`, `catsquish2.png`, `catlong1.png`, `catlong2.png`      |
+Remove these files that are no longer needed:
+- `src/assets/bearsquish1.png`, `bearsquish2.png`, `bearlong2.png`
+- `src/assets/catsquish1.png`, `catsquish2.png`, `catlong2.png`
+- `src/assets/dogsquish1.png`, `dogsquish2.png`, `doglong2.png`
 
+**3. Update `AnimalCharacter.tsx`**
 
-Sources: the previously uploaded bear and cat frames from this message, and ask for new images for the dog and duck.
-
-**2. Update `AnimalCharacter.tsx**`
-
-- Import all new frame images (squish1, squish2, long1, long2 for bear/cat)
-- Create an `animalIdleFrames` map: for each animal, an array of 8 image references following the cycle sequence
-- Add a `useState` + `useEffect` with a 250ms `setInterval` that cycles through the frame index (0-7)
-- When `active` is false, render the current idle frame; when `active` is true, render the active image (no cycling)
+- Remove all squish/long2 imports
+- Add import for `ducklong1.png`
+- Simplify `animalIdleFrames` to 2-frame arrays: `[original, long1]` for all four animals (including chicken/duck)
+- Change the interval cycle from `% 8` to `% 2`
+- Keep the same 250ms timing
 
 ### Technical Details
 
 ```text
-AnimalCharacter component logic:
+// Simplified idle frames
+const animalIdleFrames: Record<AnimalType, string[]> = {
+  bear: [bearImg, bearLong1],
+  cat: [catImg, catLong1],
+  dog: [dogImg, dogLong1],
+  chicken: [duckImg, duckLong1],
+};
 
-if (active) -> show animalActiveImages[animal]
-else if (animalIdleFrames[animal]) -> cycle through 8 frames at 250ms
-else -> show static animalImages[animal] (chicken fallback)
+// Interval cycles % 2 instead of % 8
+setFrameIndex((prev) => (prev + 1) % 2);
 ```
 
-No changes needed to `Home.tsx` or any other file -- the animation is self-contained in `AnimalCharacter`.
+No changes needed outside `AnimalCharacter.tsx`.
