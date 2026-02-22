@@ -6,6 +6,16 @@ import { useApp } from "@/context/AppContext";
 import AnimalCharacter from "@/components/AnimalCharacter";
 import BreakReminder from "@/components/BreakReminder";
 
+import icebergBg from "@/assets/Iceberg.png";
+import fieldBg from "@/assets/Field.png";
+import houseBg from "@/assets/House.png";
+
+const backgroundMap: Record<string, string> = {
+  "bg-iceberg": icebergBg,
+  "bg-field": fieldBg,
+  "bg-house": houseBg,
+};
+
 const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60)
     .toString()
@@ -17,7 +27,8 @@ const formatTime = (seconds: number) => {
 const springTransition = { type: "spring" as const, stiffness: 200, damping: 20 };
 
 const Home = () => {
-  const { paws, timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer } = useApp();
+  const { paws, timerSeconds, timerRunning, startTimer, pauseTimer, stopTimer, equippedBackground } = useApp();
+  const bgImage = equippedBackground ? backgroundMap[equippedBackground] : null;
   const navigate = useNavigate();
   const [isStudying, setIsStudying] = useState(false);
 
@@ -48,6 +59,22 @@ const Home = () => {
 
   return (
     <div className="min-h-screen theme-gradient grainy flex flex-col relative overflow-hidden">
+      {/* Equipped background image */}
+      <AnimatePresence>
+        {bgImage && (
+          <motion.img
+            key={equippedBackground}
+            src={bgImage}
+            alt="Background"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            draggable={false}
+          />
+        )}
+      </AnimatePresence>
       <BreakReminder />
 
       {/* Top Bar - Paws */}
