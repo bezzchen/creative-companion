@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useApp, AnimalType, COSMETIC_STORE } from "@/context/AppContext";
 import bearImg from "@/assets/bear.png";
 import catImg from "@/assets/cat.png";
@@ -11,6 +12,10 @@ import bearIconImg from "@/assets/bearicon.png";
 import catIconImg from "@/assets/caticon.png";
 import dogIconImg from "@/assets/dogicon.png";
 import chickenIconImg from "@/assets/chickenicon.png";
+import dogSquish1 from "@/assets/dogsquish1.png";
+import dogSquish2 from "@/assets/dogsquish2.png";
+import dogLong1 from "@/assets/doglong1.png";
+import dogLong2 from "@/assets/doglong2.png";
 
 const animalImages: Record<AnimalType, string> = {
   bear: bearImg,
@@ -33,6 +38,14 @@ export const animalIconImages: Record<AnimalType, string> = {
   chicken: chickenIconImg,
 };
 
+// Idle animation frames: original -> squish1 -> squish2 -> squish1 -> original -> long1 -> long2 -> long1
+const animalIdleFrames: Record<AnimalType, string[]> = {
+  dog: [dogImg, dogSquish1, dogSquish2, dogSquish1, dogImg, dogLong1, dogLong2, dogLong1],
+  bear: Array(8).fill(bearImg),
+  cat: Array(8).fill(catImg),
+  chicken: Array(8).fill(duckImg),
+};
+
 interface Props {
   size?: "sm" | "md" | "lg" | "xl" | "2xl";
   animal?: AnimalType;
@@ -51,9 +64,22 @@ const sizeMap = {
 const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false }: Props) => {
   const { animal: ctxAnimal, equippedHat } = useApp();
   const animal = animalProp || ctxAnimal;
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  useEffect(() => {
+    if (active || !animal) {
+      setFrameIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setFrameIndex((prev) => (prev + 1) % 8);
+    }, 250);
+    return () => clearInterval(interval);
+  }, [active, animal]);
+
   if (!animal) return null;
 
-  const img = active ? animalActiveImages[animal] : animalImages[animal];
+  const img = active ? animalActiveImages[animal] : animalIdleFrames[animal][frameIndex];
   const hatItem = equippedHat ? COSMETIC_STORE.find((c) => c.id === equippedHat) : null;
 
   return (
