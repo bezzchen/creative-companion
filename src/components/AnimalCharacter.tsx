@@ -114,7 +114,7 @@ const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, acti
   }
 
   return (
-    <div className={`relative ${sizeMap[size]} flex-shrink-0`}>
+    <div className={`relative ${sizeMap[size]} flex-shrink-0 ${paused ? "mt-6" : ""}`}>
       <img src={img} alt={animal} className="w-full h-full object-contain drop-shadow-lg" draggable={false} />
     </div>
   );
