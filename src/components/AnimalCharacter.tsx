@@ -16,6 +16,10 @@ import dogSquish1 from "@/assets/dogsquish1.png";
 import dogSquish2 from "@/assets/dogsquish2.png";
 import dogLong1 from "@/assets/doglong1.png";
 import dogLong2 from "@/assets/doglong2.png";
+import catSquish1 from "@/assets/catsquish1.png";
+import catSquish2 from "@/assets/catsquish2.png";
+import catLong1 from "@/assets/catlong1.png";
+import catLong2 from "@/assets/catlong2.png";
 
 const animalImages: Record<AnimalType, string> = {
   bear: bearImg,
@@ -42,7 +46,7 @@ export const animalIconImages: Record<AnimalType, string> = {
 const animalIdleFrames: Record<AnimalType, string[]> = {
   dog: [dogImg, dogSquish1, dogSquish2, dogSquish1, dogImg, dogLong1, dogLong2, dogLong1],
   bear: Array(8).fill(bearImg),
-  cat: Array(8).fill(catImg),
+  cat: [catImg, catSquish1, catSquish2, catSquish1, catImg, catLong1, catLong2, catLong1],
   chicken: Array(8).fill(duckImg),
 };
 
@@ -54,11 +58,11 @@ interface Props {
 }
 
 const sizeMap = {
-  sm: "w-16 h-16",
-  md: "w-40 h-40",
-  lg: "w-64 h-64",
-  xl: "w-72 h-72",
-  "2xl": "w-[36rem] h-[36rem]",
+  sm: "w-16",
+  md: "w-40",
+  lg: "w-64",
+  xl: "w-72",
+  "2xl": "w-[36rem]",
 };
 
 const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, active = false }: Props) => {
@@ -92,7 +96,7 @@ const AnimalCharacter = ({ size = "lg", animal: animalProp, showHat = true, acti
       <img
         src={img}
         alt={animal}
-        className="w-full h-full object-contain drop-shadow-lg"
+        className="w-full h-auto drop-shadow-lg"
         draggable={false}
       />
     </div>
