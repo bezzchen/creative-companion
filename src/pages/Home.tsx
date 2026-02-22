@@ -1,19 +1,10 @@
 import { useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Play, Pause, Square, Users, User, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import AnimalCharacter from "@/components/AnimalCharacter";
 import BreakReminder from "@/components/BreakReminder";
-
-const floatAnimation = {
-  y: [0, -8, 0],
-  transition: {
-    duration: 2.5,
-    repeat: Infinity,
-    ease: "easeInOut" as const,
-  },
-};
 
 const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60)
@@ -64,87 +55,96 @@ const Home = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
-        {/* Timer display - only visible when studying */}
-        {isStudying && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-            <div className="bg-card/90 backdrop-blur-sm rounded-3xl px-10 py-4 shadow-lg border border-border/50">
-              <span className="text-5xl font-mono font-bold text-foreground tracking-widest">
-                {formatTime(timerSeconds)}
-              </span>
-            </div>
-          </motion.div>
-        )}
-
         {/* Animal + Buttons Zone */}
-        <div className="relative flex items-center justify-center">
-          {/* Group icon - floating left */}
-          {!isStudying && (
-            <motion.button
-              layoutId="group-icon"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }}
-              onClick={() => navigate("/groups")}
-              className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
-            >
-              <Users className="w-5 h-5 text-primary" />
-            </motion.button>
-          )}
-
-          {/* Profile icon - floating right */}
-          {!isStudying && (
-            <motion.button
-              layoutId="profile-icon"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
-              onClick={() => navigate("/profile")}
-              className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
-            >
-              <User className="w-5 h-5 text-primary" />
-            </motion.button>
-          )}
-
-          {/* Animal */}
-          <div className="relative z-10">
-            <AnimalCharacter size="2xl" active={isStudying} />
-
-            {/* Play/Pause + Stop buttons - always rendered, animated via props */}
-            <div className="absolute inset-0 flex items-center justify-center z-30">
-              {/* Play/Pause button */}
-              <motion.button
-                animate={{ x: isStudying ? -44 : 0 }}
-                transition={springTransition}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={isStudying ? (timerRunning ? handlePause : startTimer) : handlePlay}
-                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-xl ${
-                  isStudying ? "bg-accent" : "bg-primary glow-shadow"
-                }`}
+        <div className="relative flex flex-col items-center justify-center">
+          {/* Timer - behind animal, floats up */}
+          <AnimatePresence>
+            {isStudying && (
+              <motion.div
+                key="timer"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="mb-[-2rem] z-0 relative"
               >
-                {isStudying && !timerRunning ? (
-                  <Play className="w-7 h-7 text-accent-foreground ml-1" fill="currentColor" />
-                ) : isStudying ? (
-                  <Pause className="w-7 h-7 text-accent-foreground" fill="currentColor" />
-                ) : (
-                  <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
-                )}
-              </motion.button>
+                <div className="bg-card/90 backdrop-blur-sm rounded-3xl px-10 py-4 shadow-lg border border-border/50">
+                  <span className="text-5xl font-mono font-bold text-foreground tracking-widest">
+                    {formatTime(timerSeconds)}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              {/* Stop button - slides out from behind */}
+          <div className="relative flex items-center justify-center">
+            {/* Group icon - floating left */}
+            {!isStudying && (
               <motion.button
-                animate={{
-                  x: isStudying ? 44 : 0,
-                  opacity: isStudying ? 1 : 0,
-                  scale: isStudying ? 1 : 0.5,
-                }}
-                transition={springTransition}
-                whileHover={isStudying ? { scale: 1.1 } : undefined}
-                whileTap={isStudying ? { scale: 0.9 } : undefined}
-                onClick={isStudying ? handleStop : undefined}
-                className="absolute w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
-                style={{ pointerEvents: isStudying ? "auto" : "none" }}
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }}
+                onClick={() => navigate("/groups")}
+                className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
-                <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
+                <Users className="w-5 h-5 text-primary" />
               </motion.button>
+            )}
+
+            {/* Profile icon - floating right */}
+            {!isStudying && (
+              <motion.button
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
+                onClick={() => navigate("/profile")}
+                className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
+              >
+                <User className="w-5 h-5 text-primary" />
+              </motion.button>
+            )}
+
+            {/* Animal */}
+            <div className="relative z-10">
+              <AnimalCharacter size="2xl" active={isStudying} />
+
+              {/* Play/Pause + Stop buttons */}
+              <div className="absolute inset-0 flex items-center justify-center z-30">
+                {/* Play/Pause button */}
+                <motion.button
+                  animate={{ x: isStudying ? -60 : 0 }}
+                  transition={springTransition}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={isStudying ? (timerRunning ? handlePause : startTimer) : handlePlay}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl ${
+                    isStudying ? "bg-accent" : "bg-primary glow-shadow"
+                  }`}
+                >
+                  {isStudying && !timerRunning ? (
+                    <Play className="w-9 h-9 text-accent-foreground ml-1" fill="currentColor" />
+                  ) : isStudying ? (
+                    <Pause className="w-9 h-9 text-accent-foreground" fill="currentColor" />
+                  ) : (
+                    <Play className="w-9 h-9 text-primary-foreground ml-1" fill="currentColor" />
+                  )}
+                </motion.button>
+
+                {/* Stop button */}
+                <motion.button
+                  animate={{
+                    x: isStudying ? 60 : 0,
+                    opacity: isStudying ? 1 : 0,
+                    scale: isStudying ? 1 : 0.5,
+                  }}
+                  transition={springTransition}
+                  whileHover={isStudying ? { scale: 1.1 } : undefined}
+                  whileTap={isStudying ? { scale: 0.9 } : undefined}
+                  onClick={isStudying ? handleStop : undefined}
+                  className="absolute w-20 h-20 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                  style={{ pointerEvents: isStudying ? "auto" : "none" }}
+                >
+                  <Square className="w-7 h-7 text-destructive-foreground" fill="currentColor" />
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
