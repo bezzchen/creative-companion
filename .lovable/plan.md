@@ -1,43 +1,36 @@
 
 
-## Idle Animation for Animals (Frame Cycling)
+## Add Cat Animation Frames + Fix Aspect Ratio
 
-### Overview
-Add a sprite-sheet-style idle animation to the animal character on the Home screen. The animation cycles through PNG frames in this sequence (repeating):
+### Two changes:
 
-```text
-original -> squish1 -> squish2 -> squish1 -> original -> long1 -> long2 -> long1
+**1. Copy cat animation frames** into `src/assets/`:
+- `catsquish1.png`, `catsquish2.png`, `catlong1.png`, `catlong2.png`
+
+**2. Update `AnimalCharacter.tsx`:**
+- Import the 4 new cat frame images
+- Update `animalIdleFrames.cat` to use the real frame sequence instead of repeating the original
+- Fix the aspect ratio issue: change the `img` tag's class from `object-contain` within a square container (`w-X h-X`) to instead **not force a fixed height**. The container should use a fixed width but `h-auto` (or similar) so each frame's natural aspect ratio is preserved. Alternatively, keep the square container but ensure the image uses `object-contain` properly -- the issue is likely that the container itself has equal width and height, which works for square images but stretches or letterboxes non-square ones.
+
+**Specific fix for aspect ratio:** Change the container from `w-64 h-64` (square) to `w-64` only, and remove the fixed height. The `img` element already has `object-contain`, but within a forced-square container, images with different aspect ratios will appear to shift or resize. By letting the height be determined by the image content, each frame will display at its natural aspect ratio.
+
+The `sizeMap` will change from:
+```
+sm: "w-16 h-16"
+md: "w-40 h-40"
+lg: "w-64 h-64"
+...
+```
+To:
+```
+sm: "w-16"
+md: "w-40"
+lg: "w-64"
+...
 ```
 
-Only dog frames are available now; the system will be built to support all animals once their frames are uploaded.
+And the `img` tag will use `w-full h-auto` instead of `w-full h-full object-contain`, so the image height naturally follows the width based on each frame's aspect ratio.
 
-### Steps
-
-**1. Copy uploaded images into `src/assets/`**
-- `dogsquish1.png`
-- `dogsquish2.png`
-- `doglong1.png`
-- `doglong2.png`
-
-**2. Update `AnimalCharacter.tsx`**
-- Import the new dog frame images.
-- Define an `animalIdleFrames` record mapping each `AnimalType` to an ordered array of 8 image sources following the cycle: `[original, squish1, squish2, squish1, original, long1, long2, long1]`. For animals without frames yet (bear, cat, chicken), the array will just repeat the original image 8 times (no visible animation until frames are uploaded).
-- Add a `useEffect` + `useState` to cycle through the frame array on a timer (roughly 200-250ms per frame) when `active` is `false` (idle state). When `active` is `true` (studying), use the existing active image instead.
-- Render the current frame as the `img` src.
-
-### Technical Details
-
-The component will use:
-- `useState` for the current frame index (0-7)
-- `useEffect` with `setInterval` to advance the frame index, wrapping around with modulo
-- The interval only runs when `active === false`
-- Frame duration: ~250ms per frame, giving a full cycle of ~2 seconds
-
-```text
-AnimalCharacter
-  |-- idle (active=false): cycles through 8-frame array on interval
-  |-- studying (active=true): shows the single active image (no cycling)
-```
-
-No changes needed to `Home.tsx` -- the animation is self-contained in `AnimalCharacter`.
+### Files changed
+- `src/components/AnimalCharacter.tsx` -- imports, idle frames for cat, and aspect ratio fix
 
