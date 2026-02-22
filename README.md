@@ -1,73 +1,11 @@
-# Welcome to your Lovable project
+### What is this about?
+StudyPaws is a gamified study timer app that helps students stay focused and build consistent study habits. Users pick an animal companion (bear, cat, dog, or duck) that animates while they study, earning "paws" (in-app currency) for time spent focused. Paws can be spent in a cosmetic store to customize their character. The app also supports study groups with invite codes for accountability, tracks streaks and hours studied, and includes break reminders.
 
-## Project info
+### Tech stack
+React + Vite, TypeScript, Tailwind CSS, Framer Motion (animations), Supabase (auth, database, real-time), shadcn/ui, and React Router.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+### Problem it solves
+Studying alone can feel unrewarding and isolating. StudyPaws adds motivation through cute pet companions, visible progress tracking, and social accountability via study groups — turning focused work into a rewarding habit.
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Visit the project:
+https://creative-companion.vercel.app/
