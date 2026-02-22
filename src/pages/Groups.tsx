@@ -92,7 +92,7 @@ const Groups = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-extrabold text-foreground">My Study Groups</h1>
-              <img src={mygroupImg} alt="My Group" className="w-12 h-12 object-contain" />
+              <img src={mygroupImg} alt="My Group" className="w-28 h-15 object-contain" />
             </div>
             {isLoading ? (
               <p className="text-muted-foreground text-center py-10">Loading groups...</p>
