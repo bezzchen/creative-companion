@@ -52,14 +52,14 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start px-6 py-6 bg-gradient-to-b from-[hsl(200,80%,92%)] to-background">
+    <div className="min-h-screen flex flex-col items-center justify-start px-6 py-4 bg-gradient-to-b from-[hsl(200,80%,92%)] to-background">
       {/* Logo */}
       <motion.img
         src={longLogo}
         alt="Study Buddy"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="h-12 object-contain mt-2 mb-4"
+        className="h-10 object-contain mt-1 mb-2"
       />
 
       {/* Form Card */}
@@ -68,7 +68,7 @@ const Auth = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 bg-card rounded-3xl p-6 shadow-lg border border-border mt-4"
+        className="w-full max-w-sm space-y-3 bg-card rounded-3xl p-5 shadow-lg border border-border mt-2"
       >
         <input
           type="email"
@@ -97,13 +97,13 @@ const Auth = () => {
       </motion.form>
 
       {/* Speech Bubble + Animal */}
-      <div className="flex flex-col items-center mt-4">
+      <div className="flex flex-col items-center mt-1">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           className="relative mb-0"
         >
-          <div className="bg-card/90 rounded-2xl px-8 py-4 shadow-lg border border-border text-center">
+          <div className="bg-card/90 rounded-2xl px-6 py-3 shadow-lg border border-border text-center">
             <p className="text-foreground font-semibold text-sm">
               {isLogin ? "Welcome back!" : "Create your account"}
             </p>
@@ -114,7 +114,7 @@ const Auth = () => {
         <img
           src={frame === 0 ? animal.idle : animal.long}
           alt="Animal character"
-          className="w-80 h-80 object-contain"
+          className="w-72 h-72 object-contain"
         />
       </div>
 
