@@ -119,7 +119,7 @@ const Home = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-8 top-12 z-20"
+                className="absolute left-[82px] top-12 z-20"
               >
                 <motion.button
                   layoutId="groups-icon"
