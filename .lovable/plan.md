@@ -1,95 +1,79 @@
 
 
-## Pause State, New Cosmetics with Real Images
+## Fix Store Purchases and Make All Cosmetics Work
 
-### Overview
-Three changes: (1) show `activetable.png` when the timer is paused, (2) replace the old emoji-based cosmetic store with the actual uploaded images, and (3) make the animal on the home screen reflect the equipped cosmetic.
+### Problem
+The store is broken because the **database `cosmetics` table** contains the old item IDs (e.g., `hat-crown`, `hat-tophat`, `bg-sunset`) but the frontend `COSMETIC_STORE` now uses new IDs (e.g., `hat-hat`, `hat-bow`, `bg-iceberg`). The `purchase_cosmetic` RPC validates against the database, so every purchase fails with "Invalid cosmetic item".
 
----
+### Solution
 
-### 1. Paused State: Show activetable.png
+#### 1. Database Migration -- Replace cosmetics catalog
 
-**`src/components/AnimalCharacter.tsx`**
-- Add a `paused` prop (boolean, default false)
-- Import `activetable.png`
-- When `paused` is true, render `activetable.png` instead of the normal animal image
+Create a new migration that:
+- Deletes all rows from `cosmetics` table
+- Inserts the 9 new items matching the frontend IDs and prices
+- Clears any `user_cosmetics` referencing old IDs that no longer exist
+- Resets any equipped cosmetics on profiles that reference old IDs
 
-**`src/pages/Home.tsx`**
-- Pass `paused={isStudying && !timerRunning}` to `AnimalCharacter`
+New items to insert:
 
----
+| ID | Name | Category | Price | Preview |
+|----|------|----------|-------|---------|
+| hat-hat | Hat | hat | 30 | hat |
+| hat-bow | Bow | hat | 25 | bow |
+| hat-glasses | Glasses | hat | 20 | glasses |
+| bg-iceberg | Iceberg | background | 80 | iceberg |
+| bg-field | Field | background | 70 | field |
+| bg-house | House | background | 75 | house |
+| border-butterfly | Butterfly | border | 50 | butterfly |
+| border-music | Music | border | 45 | music |
+| border-fire | Fire | border | 55 | fire |
 
-### 2. Replace COSMETIC_STORE with Real Image Items
+#### 2. No frontend changes needed
 
-**`src/context/AppContext.tsx`**
-- Replace the old 13-item `COSMETIC_STORE` with 9 items across 3 categories:
-  - **hat** (animal cosmetics): Hat, Bow, Glasses -- preview images from `hat.png`, `bow.png`, `glasses.png`
-  - **background**: Iceberg, Field, House -- preview images from `Iceberg.png`, `Field.png`, `House.png`
-  - **border** (renamed to "Icons" in UI only): Butterfly, Music, Fire -- preview images from `butterfly.png`, `music.png`, `fire.png`
-- The `preview` field changes from emoji string to imported image path
-- Update `CosmeticItem` interface: `preview` becomes `string` (still works, just holds an image URL now)
+The frontend code (Store.tsx, AppContext.tsx, AnimalCharacter.tsx) already correctly handles:
+- Buying via `purchase_cosmetic` RPC
+- Equipping/unequipping all 3 categories (hat, border, background) via `equipCosmetic`/`unequipCosmetic` in AppContext
+- Displaying the equipped hat on the home screen via `cosmeticAnimalMap` in AnimalCharacter
 
-New store items:
-| ID | Name | Category | Price |
-|----|------|----------|-------|
-| hat-hat | Hat | hat | 30 |
-| hat-bow | Bow | hat | 25 |
-| hat-glasses | Glasses | hat | 20 |
-| bg-iceberg | Iceberg | background | 80 |
-| bg-field | Field | background | 70 |
-| bg-house | House | background | 75 |
-| border-butterfly | Butterfly | border | 50 |
-| border-music | Music | border | 45 |
-| border-fire | Fire | border | 55 |
-
----
-
-### 3. Animal Reflects Equipped Hat Cosmetic on Home Screen
-
-**`src/components/AnimalCharacter.tsx`**
-- Import all animal+cosmetic composite images: `bearhat.png`, `bearbow.png`, `bearglasses.png`, `cathat.png`, `catbow.png`, `catglasses.png`, `doghat.png`, `dogbow.png`, `dogglasses.png`, `duckhat.png`, `duckbow.png`, `duckglasses.png`
-- Create a lookup map: `{ "hat-hat": { bear: bearhat, cat: cathat, ... }, "hat-bow": { ... }, "hat-glasses": { ... } }`
-- When `equippedHat` is set and the animal is in idle state (not active, not paused), use the composite image instead of the base animal image
-- Remove the old emoji hat overlay (`hatItem` / emoji `<div>`)
-- Read `equippedHat` from context (already done)
-
----
-
-### 4. Store UI Update
-
-**`src/pages/Store.tsx`**
-- Update the item preview from emoji `<span>` to `<img>` tag showing the `item.preview` image
-- Update category label for "border" to display as "Icons" with a suitable emoji
-
----
-
-### 5. Clean Up Old Code
-
-- Remove old cosmetic-specific animal imports that are no longer needed (e.g., `bearbow.png` for old overlays -- actually these are still used for composites)
-- Remove the emoji-based hat overlay logic in `AnimalCharacter.tsx` (lines 86-91)
-- Remove old `COSMETIC_STORE` items that no longer exist
-
----
+Once the database items match the frontend IDs, everything will work.
 
 ### Technical Details
 
-**AnimalCharacter.tsx image selection logic:**
+**Migration SQL:**
 ```text
-if paused -> activetable.png
-else if active -> animalActiveImages[animal]
-else if equippedHat and cosmeticAnimalMap[equippedHat][animal] exists -> composite image
-else -> idle animation frames (existing behavior)
-```
+-- Clean up old cosmetics references
+DELETE FROM user_cosmetics WHERE cosmetic_id NOT IN (
+  'hat-hat','hat-bow','hat-glasses',
+  'bg-iceberg','bg-field','bg-house',
+  'border-butterfly','border-music','border-fire'
+);
 
-**Store.tsx preview rendering:**
-```text
-Before: <span className="text-4xl">{item.preview}</span>
-After:  <img src={item.preview} className="w-16 h-16 object-contain" />
+-- Reset equipped cosmetics referencing old items
+UPDATE profiles SET equipped_hat = NULL
+  WHERE equipped_hat IS NOT NULL
+  AND equipped_hat NOT IN ('hat-hat','hat-bow','hat-glasses');
+UPDATE profiles SET equipped_border = NULL
+  WHERE equipped_border IS NOT NULL
+  AND equipped_border NOT IN ('border-butterfly','border-music','border-fire');
+UPDATE profiles SET equipped_background = NULL
+  WHERE equipped_background IS NOT NULL
+  AND equipped_background NOT IN ('bg-iceberg','bg-field','bg-house');
+
+-- Replace cosmetics catalog
+DELETE FROM cosmetics;
+INSERT INTO cosmetics (id, name, category, price, preview) VALUES
+  ('hat-hat', 'Hat', 'hat', 30, 'hat'),
+  ('hat-bow', 'Bow', 'hat', 25, 'bow'),
+  ('hat-glasses', 'Glasses', 'hat', 20, 'glasses'),
+  ('bg-iceberg', 'Iceberg', 'background', 80, 'iceberg'),
+  ('bg-field', 'Field', 'background', 70, 'field'),
+  ('bg-house', 'House', 'background', 75, 'house'),
+  ('border-butterfly', 'Butterfly', 'border', 50, 'butterfly'),
+  ('border-music', 'Music', 'border', 45, 'music'),
+  ('border-fire', 'Fire', 'border', 55, 'fire');
 ```
 
 **Files changed:**
-- `src/context/AppContext.tsx` -- new COSMETIC_STORE items with image imports
-- `src/components/AnimalCharacter.tsx` -- paused prop, composite images, remove emoji overlay
-- `src/pages/Home.tsx` -- pass paused prop
-- `src/pages/Store.tsx` -- render image previews, update category label
+- New migration file in `supabase/migrations/` (database only fix)
 
