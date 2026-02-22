@@ -66,11 +66,7 @@ const Home = () => {
       <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
         {/* Timer display - only visible when studying */}
         {isStudying && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <div className="bg-card/90 backdrop-blur-sm rounded-3xl px-10 py-4 shadow-lg border border-border/50">
               <span className="text-5xl font-mono font-bold text-foreground tracking-widest">
                 {formatTime(timerSeconds)}
@@ -120,7 +116,7 @@ const Home = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={isStudying ? (timerRunning ? handlePause : startTimer) : handlePlay}
-                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-xl ${
+                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl ${
                   isStudying ? "bg-accent" : "bg-primary glow-shadow"
                 }`}
               >
@@ -144,7 +140,7 @@ const Home = () => {
                 whileHover={isStudying ? { scale: 1.1 } : undefined}
                 whileTap={isStudying ? { scale: 0.9 } : undefined}
                 onClick={isStudying ? handleStop : undefined}
-                className="absolute w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+                className="absolute w-20 h-20 rounded-full bg-destructive flex items-center justify-center shadow-lg"
                 style={{ pointerEvents: isStudying ? "auto" : "none" }}
               >
                 <Square className="w-5 h-5 text-destructive-foreground" fill="currentColor" />
