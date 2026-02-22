@@ -17,6 +17,15 @@ import catActiveImg from "@/assets/catactive.png";
 import dogActiveImg from "@/assets/dogactive.png";
 import chickenActiveImg from "@/assets/chickenactive.png";
 import idleTableImg from "@/assets/idletable.png";
+import butterflyIcon from "@/assets/butterfly.png";
+import musicIcon from "@/assets/music.png";
+import fireIcon from "@/assets/fire.png";
+
+const borderIconMap: Record<string, string> = {
+  "border-butterfly": butterflyIcon,
+  "border-music": musicIcon,
+  "border-fire": fireIcon,
+};
 
 const activeImages: Record<AnimalType, string> = {
   bear: bearActiveImg,
@@ -161,16 +170,26 @@ const Groups = () => {
                       <span className="text-base font-bold text-muted-foreground w-8 text-center">
                         {rankLabels[i] || `${i + 1}th`}
                       </span>
-                      <div
-                        className={`w-14 h-14 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center flex-shrink-0 ${
-                          borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
-                        }`}
-                      >
-                        <img
-                          src={animalIconImages[animalType]}
-                          alt={animalType}
-                          className="w-10 h-10 object-contain"
-                        />
+                      <div className="relative flex-shrink-0">
+                        <div
+                          className={`w-14 h-14 rounded-full overflow-hidden bg-muted/50 flex items-center justify-center ${
+                            borderItem ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
+                          }`}
+                        >
+                          <img
+                            src={animalIconImages[animalType]}
+                            alt={animalType}
+                            className="w-10 h-10 object-contain"
+                          />
+                        </div>
+                        {p.equipped_border && borderIconMap[p.equipped_border] && (
+                          <img
+                            src={borderIconMap[p.equipped_border]}
+                            alt=""
+                            className="absolute -bottom-1 -right-1 w-6 h-6 object-contain"
+                            draggable={false}
+                          />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground text-base truncate">

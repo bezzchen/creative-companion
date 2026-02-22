@@ -6,6 +6,16 @@ import { useAuth } from "@/context/AuthContext";
 import { Plus, Clock, Flame, LogOut, Pencil } from "lucide-react";
 import { animalIconImages } from "@/components/AnimalCharacter";
 
+import butterflyIcon from "@/assets/butterfly.png";
+import musicIcon from "@/assets/music.png";
+import fireIcon from "@/assets/fire.png";
+
+const borderIconMap: Record<string, string> = {
+  "border-butterfly": butterflyIcon,
+  "border-music": musicIcon,
+  "border-fire": fireIcon,
+};
+
 const allAnimals: AnimalType[] = ["bear", "cat", "dog", "chicken"];
 
 const Profile = () => {
@@ -17,6 +27,7 @@ const Profile = () => {
   const [editValue, setEditValue] = useState(username);
 
   const borderItem = equippedBorder ? COSMETIC_STORE.find((c) => c.id === equippedBorder) : null;
+  const borderIcon = equippedBorder ? borderIconMap[equippedBorder] : null;
   const currentIcon = animal ? animalIconImages[animal] : null;
 
   const statusColor = status === "studying" ? "bg-blue-500 animate-pulse" : status === "idle" ? "bg-green-500" : "bg-gray-400";
@@ -52,14 +63,25 @@ const Profile = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 120 }}
-          className={`relative w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
-            borderItem ? "ring-4 ring-primary ring-offset-4 ring-offset-background" : "ring-2 ring-border"
-          }`}
+          className="relative"
         >
-          {currentIcon ? (
-            <img src={currentIcon} alt={animal || "avatar"} className="w-24 h-24 object-contain" draggable={false} />
-          ) : (
-            <div className="w-24 h-24 bg-muted rounded-full" />
+          <div className={`w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
+            borderItem ? "ring-4 ring-primary ring-offset-4 ring-offset-background" : "ring-2 ring-border"
+          }`}>
+            {currentIcon ? (
+              <img src={currentIcon} alt={animal || "avatar"} className="w-24 h-24 object-contain" draggable={false} />
+            ) : (
+              <div className="w-24 h-24 bg-muted rounded-full" />
+            )}
+          </div>
+          {/* Border icon decorations */}
+          {borderIcon && (
+            <>
+              <motion.img animate={{ y: [0, -4, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} src={borderIcon} alt="" className="absolute -top-2 -right-2 w-8 h-8 object-contain" draggable={false} />
+              <motion.img animate={{ y: [0, 4, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} src={borderIcon} alt="" className="absolute -bottom-2 -left-2 w-8 h-8 object-contain" draggable={false} />
+              <motion.img animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1 }} src={borderIcon} alt="" className="absolute top-1/2 -translate-y-1/2 -left-4 w-6 h-6 object-contain" draggable={false} />
+              <motion.img animate={{ y: [0, 3, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.75 }} src={borderIcon} alt="" className="absolute top-1/2 -translate-y-1/2 -right-4 w-6 h-6 object-contain" draggable={false} />
+            </>
           )}
         </motion.div>
 
