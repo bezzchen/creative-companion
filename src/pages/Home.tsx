@@ -82,12 +82,15 @@ const Home = () => {
             {!isStudying && (
               <motion.button
                 layoutId="groups-icon"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }}
                 onClick={() => navigate("/groups")}
                 className="absolute -left-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
-                <Users className="w-5 h-5 text-primary" />
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Users className="w-5 h-5 text-primary" />
+                </motion.div>
               </motion.button>
             )}
 
@@ -95,12 +98,15 @@ const Home = () => {
             {!isStudying && (
               <motion.button
                 layoutId="profile-icon"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
                 onClick={() => navigate("/profile")}
                 className="absolute -right-14 top-4 w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50 z-20"
               >
-                <User className="w-5 h-5 text-primary" />
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                  <User className="w-5 h-5 text-primary" />
+                </motion.div>
               </motion.button>
             )}
 
