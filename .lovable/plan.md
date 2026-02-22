@@ -1,53 +1,28 @@
 
 
-## Simplify Idle Animation to 2-Frame Cycle
+## Clean Up Old Animation Code
 
 ### Overview
-Simplify the idle animation from an 8-frame cycle to a simple 2-frame toggle between the original image and long1, for all four animals (bear, cat, dog, and chicken/duck).
+The previous simplification deleted the squish/long2 image files but didn't fully update `AnimalCharacter.tsx`. The file still imports deleted images and uses the old 8-frame cycle. This fix removes all references to deleted files and updates the animation to the approved 2-frame cycle.
 
-### Steps
+### Changes to `AnimalCharacter.tsx`
 
-**1. Copy uploaded images into `src/assets/`**
+**Remove these imports (lines 17-28):**
+- `bearsquish1.png`, `bearsquish2.png`, `bearlong2.png`
+- `catsquish1.png`, `catsquish2.png`, `catlong2.png`
+- `dogsquish1.png`, `dogsquish2.png`, `doglong2.png`
 
-| File | Target |
-|------|--------|
-| bear-5.png | `src/assets/bear.png` (overwrite) |
-| bearlong1-3.png | `src/assets/bearlong1.png` (overwrite) |
-| cat-4.png | `src/assets/cat.png` (overwrite) |
-| catlong1-5.png | `src/assets/catlong1.png` (overwrite) |
-| dog-4.png | `src/assets/dog.png` (overwrite) |
-| doglong1-3.png | `src/assets/doglong1.png` (overwrite) |
-| duck-3.png | `src/assets/duck.png` (overwrite) |
-| ducklong1.png | `src/assets/ducklong1.png` (new) |
+**Add missing import:**
+- `ducklong1.png` (for chicken/duck idle animation)
 
-**2. Delete unused frame images**
+**Update `animalIdleFrames` (lines 51-56):**
+- Change from 8-frame arrays to 2-frame arrays: `[original, long1]`
+- Include all four animals (add chicken/duck)
+- Change type from `Partial<Record<...>>` to `Record<...>`
 
-Remove these files that are no longer needed:
-- `src/assets/bearsquish1.png`, `bearsquish2.png`, `bearlong2.png`
-- `src/assets/catsquish1.png`, `catsquish2.png`, `catlong2.png`
-- `src/assets/dogsquish1.png`, `dogsquish2.png`, `doglong2.png`
+**Update interval (line 86):**
+- Change `% 8` to `% 2`
 
-**3. Update `AnimalCharacter.tsx`**
+### No other files need changes
+All unused image files were already deleted in the previous step.
 
-- Remove all squish/long2 imports
-- Add import for `ducklong1.png`
-- Simplify `animalIdleFrames` to 2-frame arrays: `[original, long1]` for all four animals (including chicken/duck)
-- Change the interval cycle from `% 8` to `% 2`
-- Keep the same 250ms timing
-
-### Technical Details
-
-```text
-// Simplified idle frames
-const animalIdleFrames: Record<AnimalType, string[]> = {
-  bear: [bearImg, bearLong1],
-  cat: [catImg, catLong1],
-  dog: [dogImg, dogLong1],
-  chicken: [duckImg, duckLong1],
-};
-
-// Interval cycles % 2 instead of % 8
-setFrameIndex((prev) => (prev + 1) % 2);
-```
-
-No changes needed outside `AnimalCharacter.tsx`.
