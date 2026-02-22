@@ -92,6 +92,19 @@ const Home = () => {
         </motion.button>
       </div>
 
+      {/* Home paw icon - floating top-left */}
+      {!isStudying && (
+        <motion.div className="absolute left-6 top-6 z-20">
+          <motion.button
+            layoutId="home-icon"
+            onClick={() => navigate("/home")}
+            className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50"
+          >
+            <img src={pawIcon} alt="Home" className="w-6 h-6 object-contain" />
+          </motion.button>
+        </motion.div>
+      )}
+
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10">
         {/* Animal + Buttons Zone */}
@@ -142,21 +155,6 @@ const Home = () => {
           </AnimatePresence>
 
           <div className="relative flex items-center justify-center">
-            {/* Home paw icon - floating top-left */}
-            {!isStudying && (
-              <motion.div
-                className="absolute right-[150px] top-[-20px] z-20"
-              >
-                <motion.button
-                  layoutId="home-icon"
-                  onClick={() => navigate("/home")}
-                  className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-border/50"
-                >
-                  <img src={pawIcon} alt="Home" className="w-6 h-6 object-contain" />
-                </motion.button>
-              </motion.div>
-            )}
-
             {/* Group icon - floating left */}
             {!isStudying && (
               <motion.div
