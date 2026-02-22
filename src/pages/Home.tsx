@@ -21,7 +21,15 @@ const Home = () => {
   const navigate = useNavigate();
   const [isStudying, setIsStudying] = useState(false);
 
-  const quotes = ["Let's study!", "You've got this!", "Time to focus!", "One step at a time!", "You're doing great!", "Keep it up! 📚", "You can do it! ✨"];
+  const quotes = [
+    "Let's study!",
+    "You've got this!",
+    "Time to focus!",
+    "One step at a time!",
+    "You're doing great!",
+    "Keep it up!",
+    "You can do it!",
+  ];
   const randomQuote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
   const handlePlay = useCallback(() => {
@@ -76,8 +84,8 @@ const Home = () => {
                   exit={{ opacity: 0, y: 200 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <div className="bg-card/90 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-lg border border-border/50 relative">
-                    <p className="text-sm font-semibold text-foreground text-center">{randomQuote}</p>
+                  <div className="bg-card/90 backdrop-blur-sm rounded-2xl px-10 py-6 shadow-lg border border-border/50 relative">
+                    <p className="text-base font-semibold text-foreground text-center">{randomQuote}</p>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card/90 border-r border-b border-border/50 rotate-45" />
                   </div>
                 </motion.div>
